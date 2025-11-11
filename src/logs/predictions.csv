@@ -26,3 +26,6 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-11T16:46:40.360977+00:00,50,Male,115.0,Beginner,Easy,-0.2,4,model.joblib,v1-minimal
 2025-11-11T18:25:23.854310+00:00,40,70,1115.51,7,model.joblib,v1-minimal
 2025-11-11T18:25:53.639911+00:00,34,115,1156.97,5,model.joblib,v1-minimal
+2025-11-11T18:44:59.146368+00:00,53,105,707.57,7,model.joblib,v1-minimal
+2025-11-11T18:52:29.968153+00:00,54,105,788.99,6,model.joblib,v1-minimal
+2025-11-11T18:53:00.905288+00:00,24,88.5,1746.86,9,model.joblib,v1-minimal
