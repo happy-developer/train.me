@@ -214,14 +214,33 @@ def build_app():
 
             # ---------- COLONNE DROITE ----------
             with gr.Column():
-                y_out = gr.Number(label=f"{TARGET_NAME} (prédiction)", interactive=False, precision=2)
+                gr.Markdown("### Prédiction")
+                y_out = gr.Number(label=f"{TARGET_NAME}", interactive=False, precision=2)
                 meta_out = gr.Textbox(label="Infos", interactive=False)
 
         # ====== Exemple ======
-        ex = schema.get("example_payload", {})
-        example_row = [[ex.get(col, "") for col in EXPECTED_ORDER]]
-        if any(str(v) != "" for v in example_row[0]):
-            gr.Examples(examples=example_row, inputs=comps, label="Exemple (schéma)")
+        # ex = schema.get("example_payload", {})
+        # example_row = [[ex.get(col, "") for col in EXPECTED_ORDER]]
+        # if any(str(v) != "" for v in example_row[0]):
+        #     gr.Examples(examples=example_row, inputs=comps, label="Exemple (schéma)")
+
+        # ====== Exemples ======
+        examples = [
+            {"Age": 25, "Weight (kg)": 60},
+            {"Age": 32, "Weight (kg)": 75},
+            {"Age": 40, "Weight (kg)": 70},
+            {"Age": 52, "Weight (kg)": 82},
+            {"Age": 65, "Weight (kg)": 73},
+        ]
+
+        example_rows = [[ex.get(col, "") for col in EXPECTED_ORDER] for ex in examples]
+
+        if example_rows:
+            gr.Examples(
+                examples=example_rows,
+                inputs=comps,
+                label="Exemples (schéma)"
+            )
 
         gr.Markdown("---")
 
