@@ -1,0 +1,8 @@
+{
+  "MAE":0.0,
+  "RMSE":0.01,
+  "R\u00b2":1.0,
+  "n_samples_test":4000,
+  "n_features":282,
+  "model_path":"c:\\Users\\fback\\Desktop\\Projets\\Dev\\GitHub\\train.me\\src\\models\\v1\\life_style_data\\best_pipeline_model.joblib"
+}
