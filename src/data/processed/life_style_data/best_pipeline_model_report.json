@@ -50,13 +50,13 @@
       "warm_start":false
     },
     "model__max_depth":null,
-    "model__min_samples_split":5,
-    "model__n_estimators":400,
+    "model__min_samples_split":2,
+    "model__n_estimators":200,
     "scaler":"passthrough"
   },
-  "cv_best_r2":0.9999629908,
-  "test_mae":0.0015374212,
-  "test_rmse":0.0053416648,
-  "test_r2":0.9999711419,
-  "n_features_in":282
+  "cv_best_r2":0.999970836,
+  "test_mae":0.0017179553,
+  "test_rmse":0.0067949077,
+  "test_r2":0.9999521004,
+  "n_features_in":217
 }
