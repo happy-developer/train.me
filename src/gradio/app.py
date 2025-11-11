@@ -22,6 +22,12 @@ DB_DEFAULT_ABS = Path(r"C:\Users\fback\Desktop\Projets\Dev\GitHub\train.me\src\d
 DB_DEFAULT_REL = SRC_DIR / "data" / "processed" / "life_style_data" / "life_style_data_val.db"
 DB_PATH = Path(os.getenv("VAL_DB_PATH", str(DB_DEFAULT_ABS if DB_DEFAULT_ABS.exists() else DB_DEFAULT_REL)))
 
+# --- Model report JSON ---
+REPORT_DEFAULT_ABS = Path(r"C:\Users\fback\Desktop\Projets\Dev\GitHub\train.me\src\models\v1\life_style_data\model_report.json")
+REPORT_DEFAULT_REL = MODEL_DIR / "model_report.json"
+REPORT_PATH = Path(os.getenv("MODEL_REPORT_PATH", str(REPORT_DEFAULT_ABS if REPORT_DEFAULT_ABS.exists() else REPORT_DEFAULT_REL)))
+
+
 
 # ---------- Load model & schema ----------
 model = joblib.load(MODEL_PATH)
@@ -93,6 +99,40 @@ def _bounds(spec: dict):
         step = 0.1 if (vmax - vmin) <= 20 else 0.5
     return vmin, vmax, default, step
 
+def _read_model_report(path: Path) -> dict:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _report_summary_df(rep: dict) -> pd.DataFrame:
+    if not rep:
+        return pd.DataFrame({"Info": ["created_at", "target", "n_features", "n_test_samples",
+                                      "selected_model.type", "selected_model.class"],
+                             "Valeur": ["-", "-", "-", "-", "-", "-"]})
+    sel = rep.get("selected_model", {})
+    rows = [
+        ("created_at", rep.get("created_at", "-")),
+        ("target", rep.get("target", "-")),
+        ("n_features", rep.get("n_features", "-")),
+        ("n_test_samples", rep.get("n_test_samples", "-")),
+        ("selected_model.type", sel.get("model_type", "-")),
+        ("selected_model.class", sel.get("model_class", "-")),
+    ]
+    return pd.DataFrame(rows, columns=["Info", "Valeur"])
+
+def _report_metrics_df(rep: dict) -> pd.DataFrame:
+    mets = rep.get("metrics_by_model", {})
+    if not mets:
+        return pd.DataFrame(columns=["Modèle", "MAE", "RMSE", "R2"])
+    df = pd.DataFrame(mets).T.reset_index().rename(columns={"index": "Modèle"})
+    # arrondis propres
+    for c in ("MAE", "RMSE", "R2"):
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce").round(3)
+    return df[["Modèle", "MAE", "RMSE", "R2"]]
+
 
 # ---------- SQLite helpers (DataTable) ----------
 def _list_tables(conn: sqlite3.Connection) -> list[str]:
@@ -147,21 +187,23 @@ def _load_val_subset(db_path: Path, wanted_cols: list[str], limit: int = 500) ->
     return pd.DataFrame(columns=display_cols)
 
 
-
-
 # ---------- UI ----------
 def build_app():
     app_title = f"TrAIn.me — {schema.get('model_name','model')} ({schema.get('model_version','v?')})"
     app_desc = f"Prédiction de `{TARGET_NAME}` à partir de : {', '.join(EXPECTED_ORDER)}."
 
+    # En-têtes du tableau de validation : cible d'abord, puis features
+    DISPLAY_HEADERS = [TARGET_NAME] + [c for c in EXPECTED_ORDER if c != TARGET_NAME]
+
     with gr.Blocks(title=app_title) as demo:
         gr.Markdown(f"# {app_title}\n{app_desc}")
 
-        # Inputs
+        # ====== Ligne principale (inputs/pred) ======
         with gr.Row():
+            # ---------- COLONNE GAUCHE ----------
             with gr.Column():
-                comps = []
-                names = []
+                gr.Markdown("### Paramètres d’entrée")
+                comps, names = [], []
                 for spec in FEATURES:
                     name = spec["name"]
                     vmin, vmax, default, step = _bounds(spec)
@@ -170,11 +212,12 @@ def build_app():
                     names.append(name)
                 btn = gr.Button("Prédire 🔥", variant="primary")
 
+            # ---------- COLONNE DROITE ----------
             with gr.Column():
                 y_out = gr.Number(label=f"{TARGET_NAME} (prédiction)", interactive=False, precision=2)
                 meta_out = gr.Textbox(label="Infos", interactive=False)
 
-        # Exemple (depuis le schéma)
+        # ====== Exemple ======
         ex = schema.get("example_payload", {})
         example_row = [[ex.get(col, "") for col in EXPECTED_ORDER]]
         if any(str(v) != "" for v in example_row[0]):
@@ -182,40 +225,65 @@ def build_app():
 
         gr.Markdown("---")
 
-        # ======= DataTable (validation set depuis SQLite) =======
-        gr.Markdown(f"### Échantillon validation — colonnes du schéma ({', '.join(EXPECTED_ORDER)})")
+        # ====== DataTable de validation ======
+        gr.Markdown(f"### Échantillon validation — colonnes ({', '.join(DISPLAY_HEADERS)})")
         table = gr.Dataframe(
-            headers=EXPECTED_ORDER,
-            value=pd.DataFrame(columns=EXPECTED_ORDER),   # ← évite la ligne 1|2
+            headers=DISPLAY_HEADERS,
+            value=pd.DataFrame(columns=DISPLAY_HEADERS),
             interactive=False,
             wrap=True,
-            label="Validation (features only)",
+            label="Validation (features + cible si dispo)",
             row_count=(0, "dynamic"),
-            col_count=len(EXPECTED_ORDER),
-            datatype=["number"] * len(EXPECTED_ORDER)
+            col_count=len(DISPLAY_HEADERS),
+            datatype=["number"] * len(DISPLAY_HEADERS)
         )
-        
         refresh_btn = gr.Button("Recharger les données 🔄")
 
         def _load_table():
-            df = _load_val_subset(DB_PATH, EXPECTED_ORDER, limit=500)
-            # assure l'ordre + types numériques si possible
-            for col in EXPECTED_ORDER:
+            # utilise le loader qui force la cible en 1re colonne
+            df = _load_val_subset(DB_PATH, DISPLAY_HEADERS, limit=500)
+            for col in DISPLAY_HEADERS:
                 if col in df.columns:
                     df[col] = pd.to_numeric(df[col], errors="ignore")
             return df
 
-        # Charger au démarrage
+        # Chargement auto au démarrage + refresh manuel
         demo.load(fn=_load_table, inputs=None, outputs=table)
-        # Bouton refresh
         refresh_btn.click(fn=_load_table, inputs=None, outputs=table)
 
-        # Handler prédiction
+        # ====== Prédiction ======
         def _fn(*vals):
             payload = {k: v for k, v in zip(names, vals)}
             return _predict(payload)
 
         btn.click(fn=_fn, inputs=comps, outputs=[y_out, meta_out])
+
+        gr.Markdown("---")
+
+        # ====== Rapport modèle (PLEINE LARGEUR, à la fin) ======
+        with gr.Row():
+            with gr.Column():
+                rep = _read_model_report(REPORT_PATH)
+                df_sum = _report_summary_df(rep)
+                df_mets = _report_metrics_df(rep)
+
+                gr.Markdown("### Rapport modèle")
+                summary_tbl = gr.Dataframe(
+                    value=df_sum,
+                    interactive=False,
+                    wrap=True,
+                    label="Résumé",
+                    row_count=(0, "dynamic"),
+                    col_count=df_sum.shape[1]
+                )
+                metrics_tbl = gr.Dataframe(
+                    value=df_mets,
+                    interactive=False,
+                    wrap=True,
+                    label="Métriques par modèle",
+                    row_count=(0, "dynamic"),
+                    col_count=df_mets.shape[1]
+                )
 
     return demo
 
