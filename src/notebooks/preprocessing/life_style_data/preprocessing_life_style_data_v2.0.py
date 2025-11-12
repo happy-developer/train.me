@@ -582,8 +582,8 @@ print(f"✔ Shape final    : {df_scaled.shape}")
 # %%
 scaled_path = export_dir / "life_style_data_scaled.parquet"
 
-# df_scaled = pd.read_parquet(scaled_path)
-df_scaled = df_clean
+df_scaled = pd.read_parquet(scaled_path)
+# df_scaled = df_clean
 
 print(f"✔ Dataset normalisé chargé : {df_scaled.shape[0]} lignes, {df_scaled.shape[1]} colonnes")
 df_scaled.head(3)
@@ -607,7 +607,10 @@ assert target_col in df_scaled.columns, f"La colonne cible {target_col} est intr
 
 # Séparation X (features) / y (target)
 X = df_scaled.drop(columns=[target_col])
-y = df_scaled[target_col]
+print(X)
+# y = df_scaled[target_col]
+y = df[target_col]
+print(y)
 
 print(f"✔ Features (X) : {X.shape[1]} colonnes")
 print(f"✔ Target (y)   : {y.name}")
@@ -623,6 +626,8 @@ print(f"✔ Target (y)   : {y.name}")
 # %%
 X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
 X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.1765, random_state=42)  # 0.1765 × 0.85 ≈ 0.15
+
+print(f"y_train min/max: {y_train.min():.2f} / {y_train.max():.2f}")
 
 print(f"✔ Jeu d’entraînement : {X_train.shape}")
 print(f"✔ Jeu de test        : {X_test.shape}")
@@ -768,18 +773,22 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
 
 # %%
 # 2.2 Appliquer EXACTEMENT les mêmes features aux deux
-X_train_fe = create_features(X_train)
-X_test_fe  = create_features(X_test)
-X_val_fe  = create_features(X_val)
+X_train_reduced = X_train
+X_test_reduced  = X_test
+X_val_reduced  = X_val
+
+# X_train_fe = create_features(X_train)
+# X_test_fe  = create_features(X_test)
+# X_val_fe  = create_features(X_val)
 
 # corr_matrix = X_train_fe.corr().abs()
 # upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
 # to_drop = [c for c in upper_tri.columns if any(upper_tri[c] > 0.95)]
 
-print(f"🧹 Variables supprimées pour corrélation élevée (>0.95) : {len(to_drop)}")
-X_train_reduced = X_train_fe.drop(columns=to_drop, errors="ignore")
-X_test_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
-X_val_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
+# print(f"🧹 Variables supprimées pour corrélation élevée (>0.95) : {len(to_drop)}")
+# X_train_reduced = X_train_fe.drop(columns=to_drop, errors="ignore")
+# X_test_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
+# X_val_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
 
 
 # %% [markdown]
@@ -915,44 +924,98 @@ display(results.sort_values("R²", ascending=False).reset_index(drop=True))
 
 
 # %% [markdown]
+# ### Sélection du meilleur modèle
+
+# %%
+# --- Sélection du meilleur modèle (ici Random Forest)
+best_model = model_rf  # exemple : Random Forest retenu
+
+# %% [markdown]
+# ### Gestion du scaling
+
+# %%
+# --- Fit des scalers sur les données réelles
+# Le feature_scaler s'applique sur les features finales du modèle
+# Le target_scaler est ajusté sur la target brute (Calories_Burned en kcal réelles)
+feature_scaler = StandardScaler().fit(X_train[best_model.feature_names_in_])
+target_scaler  = StandardScaler().fit(y_train.values.reshape(-1, 1))
+
+print("✔ Scalers fités sur les données réelles.")
+
+# --- Transformation des jeux d'entraînement
+X_train_scaled = feature_scaler.transform(X_train[best_model.feature_names_in_])
+y_train_scaled = target_scaler.transform(y_train.values.reshape(-1, 1)).ravel()
+
+# %% [markdown]
+# ### Entraînement
+
+# %%
+# --- Entraînement du modèle sur données normalisées
+best_model.fit(X_train_scaled, y_train_scaled)
+print("✔ Modèle entraîné avec succès sur données normalisées.")
+
+# %% [markdown]
+# ### Vérifier la variance du dataset
+
+# %%
+print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
+print("Variance de la cible :", np.var(y_train_scaled))
+
+# Vérifier que le modèle produit des prédictions variées
+y_check = best_model.predict(X_train_scaled[:10])
+print("Prédictions sur 10 échantillons :", np.round(y_check, 4))
+
+# %% [markdown]
+# ### Vérification des features
+
+# %%
+# Liste des features DANS L’ORDRE utilisé pour le fit/scaling
+feature_names = X_train[best_model.feature_names_in_] \
+                    .columns.tolist() if hasattr(best_model, "feature_names_in_") \
+                else X_train.columns.tolist()
+
+# Injecter l'attribut dans le modèle (pour compat sklearn)
+setattr(best_model, "feature_names_in_", np.array(feature_names, dtype=object))
+
+# %% [markdown]
+# ### Sauvegarde des scalers pour être en phase avec "test_model.ipynb" et Gradio
+
+# %%
+# Sauvegarder à côté du modèle (file JSON)
+feature_schema_fp = model_dir / "feature_schema.json"
+with open(feature_schema_fp, "w", encoding="utf-8") as f:
+    json.dump({"feature_names_in_": feature_names}, f, ensure_ascii=False, indent=2)
+
+joblib.dump(target_scaler, model_dir / "target_scaler.joblib")
+print("✔ Scalers sauvegardés dans :", model_dir)
+
+# %% [markdown]
 # ### Sauvegarde du modèle sélectionné
 
 # %%
-best_model = model_rf  # exemple : Random Forest retenu
+# Dump modèle (après injection)
 joblib.dump(best_model, model_dir / "model.joblib")
-# feature_schema.json
 
-print("✔ Modèle sélectionné et sauvegardé : best_model_rf.joblib")
+print("✔ Modèle sauvegardé dans :", model_dir)
 
-# Chargement
+# %% [markdown]
+# ### Validation : chargement et fusion X_val + y_val (en unités réelles)
+
+# %%
 X_val = pd.read_parquet(export_dir / "X_val_feature_engineered.parquet")
 y_val = pd.read_parquet(export_dir / "y_val.parquet").squeeze()
 
-# Fusion sur position (même ordre)
 df_val = pd.concat([X_val, y_val], axis=1)
 
-# Connexion SQLite
-con = sqlite3.connect(export_dir / "life_style_data_val.db")
+# %% [markdown]
+# ### Export vers SQLite pour inspection manuelle
 
-# Export
+# %%
+con = sqlite3.connect(export_dir / "life_style_data_val.db")
 df_val.to_sql("validation_set", con, if_exists="replace", index=False)
 con.close()
 
 print(f"✔ Fusion et export terminés : {df_val.shape[0]} lignes, {df_val.shape[1]} colonnes")
-
-# --- fit des scalers (exemple)
-feature_scaler = StandardScaler().fit(X_train[best_model.feature_names_in_])  # colonnes finales vues par le modèle
-y_scaler = StandardScaler().fit(y_train.values.reshape(-1,1))
-
-# --- transformer avant fit du modèle
-X_train_scaled = feature_scaler.transform(X_train[best_model.feature_names_in_])
-y_train_scaled = y_scaler.transform(y_train.values.reshape(-1,1)).ravel()
-
-# ... fit du modèle sur X_train_scaled, y_train_scaled ...
-
-# --- persistance
-joblib.dump(feature_scaler, model_dir / "feature_scaler.joblib")
-joblib.dump(y_scaler,       model_dir / "target_scaler.joblib")
 
 
 # %% [markdown]
@@ -1110,7 +1173,7 @@ for f in schema_features:
 # Objet final du schéma
 feature_schema = {
     "model_name": "life_style_data",
-    "model_version": "v1-minimal",  # ajuste si tu es sur un set élargi
+    "model_version": "v1.1-minimal",  # ajuste si tu es sur un set élargi
     "created_at": datetime.utcnow().isoformat() + "Z",
     "target": y.name if isinstance(y, pd.Series) else "Calories_Burned",
     "features": schema_features,     # ordre = contrat d’entrée
@@ -1295,55 +1358,5 @@ print(f"✔ Schéma d’entrée sauvegardé : {schema_path.name}")
 
 # print(f"✔ Fusion et export terminés : {df_val.shape[0]} lignes, {df_val.shape[1]} colonnes")
 
-
-# %% [markdown]
-# ### Test en live
-
-# %%
-# === Paramètres UI (exemple depuis ta capture) ===
-ui_input = {
-    "Age": 34,
-    # "Gender": "Male",
-    "Weight (kg)": 115.0,
-    # "Experience_Level": "Beginner",
-    # "Difficulty Level": "Easy",
-}
-
-# %%
-base_dir  = Path(r"C:\Users\fback\Desktop\Projets\Dev\GitHub\train.me")
-model_dir = base_dir / "src" / "models" / "v1" / "life_style_data"
-model_fp  = model_dir / "model.joblib"
-fx_scaler_fp = model_dir / "feature_scaler.joblib"
-y_scaler_fp  = model_dir / "target_scaler.joblib"
-
-# %%
-# ==== Load modèle (entraîné SANS scaling/normalisation) ====
-model = joblib.load(model_fp)
-expected = list(model.feature_names_in_)  # doit être ["Age", "Weight (kg)"]
-print("✔ Modèle chargé :", model_fp.name)
-print("→ Features attendues :", expected)
-
-# %%
-# ---- Garde-fous : vérifie que le modèle attend bien nos 2 colonnes
-missing = [c for c in expected if c not in ui_input]
-if missing:
-    raise ValueError(f"Champs manquants dans l'input UI : {missing}")
-
-# ==== Construire la ligne d'entrée dans le bon ordre ====
-X_one = pd.DataFrame([[ui_input[c] for c in expected]], columns=expected)
-X_one = X_one.apply(pd.to_numeric, errors="raise")  # tout numérique
-
-# ==== Prédiction directe (sortie en unités réelles) ====
-y_pred = float(model.predict(X_one).squeeze())
-print(f"🔮 Calories_Burned (réelles) : {y_pred:.2f}")
-
-# %%
-def model_friendly(est):
-    if isinstance(est, RandomForestRegressor): return "Random Forest"
-    if isinstance(est, GradientBoostingRegressor): return "Gradient Boosting"
-    if isinstance(est, LinearRegression): return "Régression Linéaire"
-    return est.__class__.__name__
-
-print("Type de modèle :", model_friendly(model))
 
 

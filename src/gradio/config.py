@@ -7,7 +7,15 @@ MODEL_SUBDIR = ("models", "v1", "life_style_data")
 MODEL_FILENAME = "model.joblib"
 SCHEMA_FILENAME = "feature_schema.json"
 REPORT_FILENAME = "model_report.json"
+# Fichiers de scalers optionnels
+FEATURE_SCALER_FILENAME = "feature_scaler.joblib"
+TARGET_SCALER_FILENAME  = "target_scaler.joblib"
 
+# Valeurs par défaut UI (non normalisées)
+UI_DEFAULTS = {
+    "Age": 40,
+    "Weight (kg)": 70.0,
+}
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
     {"Age": 25, "Weight (kg)": 60},
@@ -41,5 +49,7 @@ def build_paths(src_dir: Path) -> dict[str, Path]:
         "LOGS_DIR": src_dir / "logs",
         "DB_PATH": src_dir.joinpath(*DB_RELATIVE),
         "REPORT_PATH": Path(report_path_env) if report_path_env else model_dir / REPORT_FILENAME,
+        "FEATURE_SCALER_PATH": model_dir / FEATURE_SCALER_FILENAME,
+        "TARGET_SCALER_PATH":  model_dir / TARGET_SCALER_FILENAME,
     }
     return paths
