@@ -96,13 +96,15 @@ def render_ml_tab(
 
         # ====== Prédiction ======
         def _fn(*vals):
-            # payload UI brut : Age, Weight (kg), Gender
             payload = {k: v for k, v in zip(names, vals)}
-            # Gradio peut renvoyer Age/Weight en str → on cast ici
+
+            # Gradio peut renvoyer les valeurs numériques en str → on force
             if "Age" in payload:
                 payload["Age"] = float(payload["Age"])
             if "Weight (kg)" in payload:
                 payload["Weight (kg)"] = float(payload["Weight (kg)"])
+            if "Experience_Level" in payload:
+                payload["Experience_Level"] = float(payload["Experience_Level"])
 
             return predict_single(
                 payload=payload,

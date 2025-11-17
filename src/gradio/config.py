@@ -17,15 +17,15 @@ UI_DEFAULTS = {
     "Age": 40,
     "Weight (kg)": 70.0,
     "Gender": "Female",
+    "Experience_Level": 1.98,
 }
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
-    {"Age": 25, "Weight (kg)": 60.0, "Gender": "Male"},
-    {"Age": 32, "Weight (kg)": 75.0, "Gender": "Female"},
-    {"Age": 40, "Weight (kg)": 70.0, "Gender": "Male"},
-    {"Age": 52, "Weight (kg)": 110.0, "Gender": "Male"},
-    {"Age": 65, "Weight (kg)": 73.0, "Gender": "Female"},
+    {"Age": 25, "Weight (kg)": 60.0, "Gender": "Male",   "Experience_Level": 1.98},
+    {"Age": 32, "Weight (kg)": 75.0, "Gender": "Female", "Experience_Level": 2.01},
+    {"Age": 40, "Weight (kg)": 70.0, "Gender": "Male",   "Experience_Level": 2.05},
 ]
+
 
 
 # Base de validation (relative au repo src/)

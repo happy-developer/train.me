@@ -12,3 +12,10 @@
 ,0,"Random","Forest","0.584926","0.754729","0.424362"
 ,1,"Gradient","Boosting","0.677323","0.841614","0.284197"
 ,2,"Régression","Linéaire","0.786334","0.994422","0.000671"
+,,,,,,
+"preprocessing_life_style_data_v2.2.pdf",,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level""",,,,,,
+,"Modèle","MAE","RMSE","R²",,
+,0,"Random","Forest","0.507611","0.638451","0.588070"
+,1,"Gradient","Boosting","0.557830","0.681172","0.531099"
+,2,"Régression","Linéaire","0.585743","0.718066","0.478930"
