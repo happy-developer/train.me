@@ -94,3 +94,12 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-12T17:01:10.456232+00:00,40,70,994.15,9,model.joblib,v1.1-minimal
 2025-11-12T17:21:28.583036+00:00,40,70,994.15,5,model.joblib,v1.1-minimal
 2025-11-12T17:21:32.088757+00:00,64,70,994.15,7,model.joblib,v1.1-minimal
+2025-11-13T18:00:05.670367+00:00,40,70,994.15,7,model.joblib,v1.1-minimal
+2025-11-13T18:00:09.825022+00:00,40,137.5,994.15,7,model.joblib,v1.1-minimal
+2025-11-17T08:45:08.132904+00:00,40,70,1107.03,11,model.joblib,v1.1-minimal
+2025-11-17T08:45:11.471137+00:00,56,70,632.47,9,model.joblib,v1.1-minimal
+2025-11-17T08:45:14.494930+00:00,56,120,909.67,8,model.joblib,v1.1-minimal
+2025-11-17T08:45:21.502597+00:00,25,60,2013.55,6,model.joblib,v1.1-minimal
+2025-11-17T08:45:47.093539+00:00,52,110,598.89,5,model.joblib,v1.1-minimal
+2025-11-17T08:46:12.094173+00:00,35,65,1193.98,5,model.joblib,v1.1-minimal
+2025-11-17T08:46:41.739050+00:00,40,50,1115.08,5,model.joblib,v1.1-minimal

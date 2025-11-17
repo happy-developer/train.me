@@ -624,14 +624,56 @@ print(f"✔ Target (y)   : {y.name}")
 # - Test (15 %) → évaluation finale, non touché avant la fin du projet
 
 # %%
-X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
-X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.1765, random_state=42)  # 0.1765 × 0.85 ≈ 0.15
+# --- Charger les features BRUTES pour Age / Weight (avant toute normalisation) ---
+raw_feat_path = export_dir / "life_style_data_feature.parquet"  # créé plus haut
+df_feat_raw = pd.read_parquet(raw_feat_path)
 
-print(f"y_train min/max: {y_train.min():.2f} / {y_train.max():.2f}")
+assert "Calories_Burned" in df_feat_raw.columns
+assert {"Age", "Weight (kg)"} <= set(df_feat_raw.columns)
 
-print(f"✔ Jeu d’entraînement : {X_train.shape}")
-print(f"✔ Jeu de test        : {X_test.shape}")
-print(f"✔ Jeu de validation  : {X_val.shape}")
+# X/y bruts
+X_raw = df_feat_raw[["Age", "Weight (kg)"]].copy()
+y_raw = df_feat_raw["Calories_Burned"].copy()
+
+print(f"✔ X_raw shape: {X_raw.shape} | y_raw shape: {y_raw.shape}")
+
+# --- Split BRUT (puisqu'on va fitter les scalers sur TRAIN uniquement) ---
+X_temp_raw, X_test_raw, y_temp_raw, y_test_raw = train_test_split(
+    X_raw, y_raw, test_size=0.15, random_state=42
+)
+X_train_raw, X_val_raw, y_train_raw, y_val_raw = train_test_split(
+    X_temp_raw, y_temp_raw, test_size=0.1765, random_state=42
+)
+
+print(f"✔ Train: {X_train_raw.shape} | Val: {X_val_raw.shape} | Test: {X_test_raw.shape}")
+print(f"y_train_raw min/max: {y_train_raw.min():.2f} / {y_train_raw.max():.2f}")
+
+
+# %% [markdown]
+# ## Fit des scalers sur TRAIN brut puis transform des 3 splits
+
+# %%
+from sklearn.preprocessing import StandardScaler
+
+# --- Scaler features appris sur TRAIN brut ---
+feature_scaler = StandardScaler().fit(X_train_raw[["Age", "Weight (kg)"]])
+
+X_train = pd.DataFrame(feature_scaler.transform(X_train_raw), columns=["Age", "Weight (kg)"])
+X_val   = pd.DataFrame(feature_scaler.transform(X_val_raw),   columns=["Age", "Weight (kg)"])
+X_test  = pd.DataFrame(feature_scaler.transform(X_test_raw),  columns=["Age", "Weight (kg)"])
+
+print("🔧 feature_scaler.mean_ :", feature_scaler.mean_)
+print("🔧 feature_scaler.scale_:", feature_scaler.scale_)  # DOIT ressembler à ~ [moy_age, ecart_type_age], pas ≈ [0,1]
+
+# --- Scaler target appris sur TRAIN brut ---
+target_scaler = StandardScaler().fit(y_train_raw.to_numpy().reshape(-1,1))
+
+y_train_std = target_scaler.transform(y_train_raw.to_numpy().reshape(-1,1)).ravel()
+y_val_std   = target_scaler.transform(y_val_raw.to_numpy().reshape(-1,1)).ravel()
+y_test_std  = target_scaler.transform(y_test_raw.to_numpy().reshape(-1,1)).ravel()
+
+print("📏 Var(y_train_std) ≈", np.var(y_train_std).round(3))
+
 
 # %% [markdown]
 # ### Vérification statistique du split
@@ -858,13 +900,28 @@ print(f"✔ Données chargées : {X_val.shape[0]} lignes, {X_val.shape[1]} colon
 # Elle permet de mesurer la capacité des features à expliquer la variable cible et sert de baseline pour les modèles plus complexes.
 
 # %%
+# Baseline linéaire
 model_lr = LinearRegression()
-model_lr.fit(X_train, y_train)
-y_pred_lr = model_lr.predict(X_test)
+model_lr.fit(X_train, y_train_std)
+y_pred_lr_std = model_lr.predict(X_val)
+print("LR (val) → MAE(std), RMSE(std), R²:",
+      mean_absolute_error(y_val_std, y_pred_lr_std),
+      np.sqrt(mean_squared_error(y_val_std, y_pred_lr_std)),
+      r2_score(y_val_std, y_pred_lr_std))
 
-mae_lr = mean_absolute_error(y_test, y_pred_lr)
-rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr))
-r2_lr = r2_score(y_test, y_pred_lr)
+# Random Forest
+model_rf = RandomForestRegressor(random_state=42, n_estimators=300)
+model_rf.fit(X_train, y_train_std)
+y_pred_rf_std = model_rf.predict(X_val)
+print("RF (val) → MAE(std), RMSE(std), R²:",
+      mean_absolute_error(y_val_std, y_pred_rf_std),
+      np.sqrt(mean_squared_error(y_val_std, y_pred_rf_std)),
+      r2_score(y_val_std, y_pred_rf_std))
+
+
+mae_lr = mean_absolute_error(y_test, y_pred_lr_std)
+rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr_std))
+r2_lr = r2_score(y_test, y_pred_lr_std)
 
 print(f"Régression linéaire → MAE: {mae_lr:.2f}, RMSE: {rmse_lr:.2f}, R²: {r2_lr:.3f}")
 
@@ -934,25 +991,36 @@ best_model = model_rf  # exemple : Random Forest retenu
 # ### Gestion du scaling
 
 # %%
-# --- Fit des scalers sur les données réelles
-# Le feature_scaler s'applique sur les features finales du modèle
-# Le target_scaler est ajusté sur la target brute (Calories_Burned en kcal réelles)
-feature_scaler = StandardScaler().fit(X_train[best_model.feature_names_in_])
-target_scaler  = StandardScaler().fit(y_train.values.reshape(-1, 1))
+# === Gestion du scaling (fit sur DONNÉES BRUTES) ===
+# IMPORTANT : fitter sur X_train brut (pas X_train_scaled, pas df_scaled déjà transformé 2x)
+feature_cols = best_model.feature_names_in_ if hasattr(best_model, "feature_names_in_") else X_train.columns
 
-print("✔ Scalers fités sur les données réelles.")
+from sklearn.preprocessing import StandardScaler
+feature_scaler = StandardScaler().fit(X_train[feature_cols])            # ✅ BRUT
+target_scaler  = StandardScaler().fit(y_train.values.reshape(-1, 1))    # ✅ kcal réelles
 
-# --- Transformation des jeux d'entraînement
-X_train_scaled = feature_scaler.transform(X_train[best_model.feature_names_in_])
+# Transformations cohérentes
+X_train_scaled = feature_scaler.transform(X_train[feature_cols])
+X_val_scaled   = feature_scaler.transform(X_val[feature_cols])
+X_test_scaled  = feature_scaler.transform(X_test[feature_cols])
+
 y_train_scaled = target_scaler.transform(y_train.values.reshape(-1, 1)).ravel()
+y_val_scaled   = target_scaler.transform(y_val.values.reshape(-1, 1)).ravel()
+y_test_scaled  = target_scaler.transform(y_test.values.reshape(-1, 1)).ravel()
+
 
 # %% [markdown]
 # ### Entraînement
 
 # %%
-# --- Entraînement du modèle sur données normalisées
 best_model.fit(X_train_scaled, y_train_scaled)
-print("✔ Modèle entraîné avec succès sur données normalisées.")
+import numpy as np
+print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
+print("Variance de la cible :", np.var(y_train_scaled))
+print("feature_scaler.mean_:", np.round(feature_scaler.mean_, 3))
+print("feature_scaler.scale_:", np.round(feature_scaler.scale_, 3))
+
+
 
 # %% [markdown]
 # ### Vérifier la variance du dataset
@@ -960,43 +1028,43 @@ print("✔ Modèle entraîné avec succès sur données normalisées.")
 # %%
 print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
 print("Variance de la cible :", np.var(y_train_scaled))
-
-# Vérifier que le modèle produit des prédictions variées
 y_check = best_model.predict(X_train_scaled[:10])
 print("Prédictions sur 10 échantillons :", np.round(y_check, 4))
+
 
 # %% [markdown]
 # ### Vérification des features
 
 # %%
-# Liste des features DANS L’ORDRE utilisé pour le fit/scaling
-feature_names = X_train[best_model.feature_names_in_] \
-                    .columns.tolist() if hasattr(best_model, "feature_names_in_") \
-                else X_train.columns.tolist()
+feature_names = X_train[best_model.feature_names_in_].columns.tolist() \
+    if hasattr(best_model, "feature_names_in_") else X_train.columns.tolist()
 
-# Injecter l'attribut dans le modèle (pour compat sklearn)
 setattr(best_model, "feature_names_in_", np.array(feature_names, dtype=object))
+
 
 # %% [markdown]
 # ### Sauvegarde des scalers pour être en phase avec "test_model.ipynb" et Gradio
 
 # %%
-# Sauvegarder à côté du modèle (file JSON)
-feature_schema_fp = model_dir / "feature_schema.json"
-with open(feature_schema_fp, "w", encoding="utf-8") as f:
-    json.dump({"feature_names_in_": feature_names}, f, ensure_ascii=False, indent=2)
+import joblib, json
+joblib.dump(feature_scaler, model_dir / "feature_scaler.joblib")
+joblib.dump(target_scaler,  model_dir / "target_scaler.joblib")
 
-joblib.dump(target_scaler, model_dir / "target_scaler.joblib")
-print("✔ Scalers sauvegardés dans :", model_dir)
+# (et garde le feature_schema.json + injection feature_names_in_ comme tu l'as fait)
+
+# (optionnel) petite sanity-check sur 10 prédictions test
+y_test_pred_std = best_model.predict(X_test)
+y_test_pred_kcal = target_scaler.inverse_transform(y_test_pred_std.reshape(-1,1)).ravel()
+print("🔎 Extrait prédictions (kcal):", np.round(y_test_pred_kcal[:10], 2))
+
 
 # %% [markdown]
 # ### Sauvegarde du modèle sélectionné
 
 # %%
-# Dump modèle (après injection)
 joblib.dump(best_model, model_dir / "model.joblib")
-
 print("✔ Modèle sauvegardé dans :", model_dir)
+
 
 # %% [markdown]
 # ### Validation : chargement et fusion X_val + y_val (en unités réelles)
