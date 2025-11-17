@@ -37,6 +37,6 @@
 "preprocessing_life_style_data_v2.5.pdf",,,,,,
 """Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)""",,,,,,
 ,"Modèle","MAE","RMSE","R²",,
-,0,"Gradient","Boosting","0.448513","0.567945","0.674028"
-,1,"Régression","Linéaire","0.450079","0.568034","0.673926"
-,2,"Random","Forest","0.474187","0.600632","0.635427"
+,0,"Gradient","Boosting","0.448367","0.567756","0.674245"
+,1,"Régression","Linéaire","0.450080","0.568061","0.673895"
+,2,"Random","Forest","0.474484","0.600432","0.635669"

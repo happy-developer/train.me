@@ -16,6 +16,7 @@ GENDER_ENCODER_FILENAME = "gender_encoder.joblib"
 UI_DEFAULTS = {
     "Age": 40,
     "Weight (kg)": 70.0,
+    "Height (m)": 1.68,
     "Gender": "Female",
     "Experience_Level": 1.98,
      "Workout_Frequency (days/week)": 5.0,
@@ -25,6 +26,7 @@ UI_EXAMPLES = [
     {
         "Age": 30,
         "Weight (kg)": 70.0,
+        "Height (m)": 1.75,
         "Gender": "Male",
         "Experience_Level": 2.0,
         "Workout_Frequency (days/week)": 3.0,
@@ -33,12 +35,14 @@ UI_EXAMPLES = [
     {
         "Age": 45,
         "Weight (kg)": 82.0,
+        "Height (m)": 1.68,
         "Gender": "Female",
         "Experience_Level": 2.1,
         "Workout_Frequency (days/week)": 4.0,
         "Session_Duration (hours)": 1.5,
     },
 ]
+
 
 
 
