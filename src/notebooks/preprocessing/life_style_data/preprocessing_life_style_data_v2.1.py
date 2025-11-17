@@ -290,13 +290,10 @@ for title, df_sec in sections.items():
 # %%
 # 1.8 Export artefacts
 parquet_path = export_dir / "life_style_data_clean.parquet"
-# csv_path     = export_dir / "life_style_data_clean.csv"
 
 df_clean.to_parquet(parquet_path, index=False, engine="fastparquet")
-# df_clean.to_csv(csv_path, index=False)
 
 print(f"✔ Export parquet : {parquet_path}")
-# print(f"✔ Export csv     : {csv_path}")
 print(f"✔ Shape final    : {df_clean.shape}")
 
 
@@ -336,7 +333,7 @@ selected_features = [
     "Calories_Burned",
 
     # Core
-    "Age", "Weight (kg)"
+    "Age", "Weight (kg)", "Gender",
 ]
 
 
@@ -355,10 +352,8 @@ if missing_features:
 
 parquet_path = export_dir / "life_style_data_feature.parquet"
 df_features.to_parquet(parquet_path, index=False, engine="fastparquet")
-# df_clean.to_csv(csv_path, index=False)
 
 print(f"✔ Export parquet : {parquet_path}")
-# print(f"✔ Export csv     : {csv_path}")
 print(f"✔ Shape final    : {df_clean.shape}")
 
 # %% [markdown]
@@ -427,6 +422,9 @@ cat_cols
 # print("✔ Encodage ordinal appliqué sur :", ordinal_features)
 # df_clean[ordinal_features].head()
 
+
+gender_encoder = OrdinalEncoder()
+df_clean[["Gender"]] = gender_encoder.fit_transform(df_features[["Gender"]])
 
 # %% [markdown]
 # ### 5.5. Encodage One-Hot
@@ -559,13 +557,9 @@ check_stats.head(10)
 
 # %%
 scaled_path = export_dir / "life_style_data_scaled.parquet"
-# csv_scaled_path = export_dir / "life_style_data_scaled.csv"
-
 df_scaled.to_parquet(scaled_path, index=False)
-# df_scaled.to_csv(csv_scaled_path, index=False)
 
 print(f"✔ Export parquet : {scaled_path}")
-# print(f"✔ Export csv     : {csv_scaled_path}")
 print(f"✔ Shape final    : {df_scaled.shape}")
 
 # %% [markdown]
@@ -613,7 +607,6 @@ df_scaled.head(3)
 
 # %%
 # Identifier la colonne cible
-# target_col = "y_calories_burned"
 target_col = "Calories_Burned"
 
 # Vérification que la variable existe bien
@@ -622,8 +615,8 @@ assert target_col in df_scaled.columns, f"La colonne cible {target_col} est intr
 # Séparation X (features) / y (target)
 X = df_scaled.drop(columns=[target_col])
 print(X)
-# y = df_scaled[target_col]
-y = df[target_col]
+y = df_scaled[target_col]
+# y = df[target_col]
 print(y)
 
 print(f"✔ Features (X) : {X.shape[1]} colonnes")
@@ -639,14 +632,16 @@ print(f"✔ Target (y)   : {y.name}")
 
 # %%
 # --- Charger les features BRUTES pour Age / Weight (avant toute normalisation) ---
-raw_feat_path = export_dir / "life_style_data_feature.parquet"  # créé plus haut
+# --- Charger les features BRUTES après encodage, avant scaling global ---
+raw_feat_path = export_dir / "life_style_data_encoded.parquet"  # dataset encodé, non normalisé
 df_feat_raw = pd.read_parquet(raw_feat_path)
+print(df_feat_raw.columns)
 
 assert "Calories_Burned" in df_feat_raw.columns
-assert {"Age", "Weight (kg)"} <= set(df_feat_raw.columns)
+assert {"Age", "Weight (kg)", "Gender_1.0"} <= set(df_feat_raw.columns)
 
-# X/y bruts
-X_raw = df_feat_raw[["Age", "Weight (kg)"]].copy()
+# X/y bruts (unités réelles pour Age / Weight / Calories_Burned, binaire pour Gender_1.0)
+X_raw = df_feat_raw[["Age", "Weight (kg)", "Gender_1.0"]].copy()
 y_raw = df_feat_raw["Calories_Burned"].copy()
 
 print(f"✔ X_raw shape: {X_raw.shape} | y_raw shape: {y_raw.shape}")
@@ -668,10 +663,22 @@ print(f"y_train_raw min/max: {y_train_raw.min():.2f} / {y_train_raw.max():.2f}")
 
 # %%
 # --- Fit des scalers sur TRAIN brut ---
-feature_scaler = StandardScaler().fit(X_train_raw[["Age", "Weight (kg)"]])
-X_train = pd.DataFrame(feature_scaler.transform(X_train_raw), columns=["Age","Weight (kg)"])
-X_val   = pd.DataFrame(feature_scaler.transform(X_val_raw),   columns=["Age","Weight (kg)"])
-X_test  = pd.DataFrame(feature_scaler.transform(X_test_raw),  columns=["Age","Weight (kg)"])
+feature_cols = ["Age", "Weight (kg)", "Gender_1.0"]
+
+feature_scaler = StandardScaler().fit(X_train_raw[feature_cols])
+
+X_train = pd.DataFrame(
+    feature_scaler.transform(X_train_raw[feature_cols]),
+    columns=feature_cols
+)
+X_val = pd.DataFrame(
+    feature_scaler.transform(X_val_raw[feature_cols]),
+    columns=feature_cols
+)
+X_test = pd.DataFrame(
+    feature_scaler.transform(X_test_raw[feature_cols]),
+    columns=feature_cols
+)
 
 target_scaler = StandardScaler().fit(y_train_raw.to_numpy().reshape(-1,1))
 y_train_std = target_scaler.transform(y_train_raw.to_numpy().reshape(-1,1)).ravel()
@@ -681,6 +688,7 @@ y_test_std  = target_scaler.transform(y_test_raw.to_numpy().reshape(-1,1)).ravel
 # Sauvegarde (une seule fois ici)
 joblib.dump(feature_scaler, model_dir / "feature_scaler.joblib")
 joblib.dump(target_scaler,  model_dir / "target_scaler.joblib")
+joblib.dump(gender_encoder, model_dir / "gender_encoder.joblib")
 
 
 # %% [markdown]
@@ -771,30 +779,30 @@ print(f"✔ Données chargées : {X_test.shape[0]} lignes, {X_test.shape[1]} col
 # Une méthode complémentaire basée sur un modèle de RandomForestRegressor est utilisée pour estimer l’importance relative des features.
 
 # %%
-# # Calcul des corrélations (variables continues uniquement)
-# corr = X_train.corrwith(y_train).dropna().sort_values(ascending=False)
-# top_corr = corr.head(10)
+# Calcul des corrélations (variables continues uniquement)
+corr = X_train.corrwith(y_train).dropna().sort_values(ascending=False)
+top_corr = corr.head(10)
 
-# plt.figure(figsize=(8,4))
-# top_corr.plot(kind="bar", color="steelblue")
-# plt.title("Corrélation des 10 variables les plus liées à Calories_Burned")
-# plt.ylabel("Coefficient de corrélation")
-# plt.grid(True, axis='y')
-# plt.show()
+plt.figure(figsize=(8,4))
+top_corr.plot(kind="bar", color="steelblue")
+plt.title("Corrélation des 10 variables les plus liées à Calories_Burned")
+plt.ylabel("Coefficient de corrélation")
+plt.grid(True, axis='y')
+plt.show()
 
-# # Modèle RandomForest pour importance des features
-# model_rf = RandomForestRegressor(random_state=42, n_estimators=100)
-# model_rf.fit(X_train, y_train)
+# Modèle RandomForest pour importance des features
+model_rf = RandomForestRegressor(random_state=42, n_estimators=100)
+model_rf.fit(X_train, y_train)
 
-# importances = pd.Series(model_rf.feature_importances_, index=X_train.columns).sort_values(ascending=False)
-# top_importances = importances.head(10)
+importances = pd.Series(model_rf.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+top_importances = importances.head(10)
 
-# plt.figure(figsize=(8,4))
-# top_importances.plot(kind="bar", color="orange")
-# plt.title("Top 10 - Importance des variables (RandomForest)")
-# plt.ylabel("Importance relative")
-# plt.grid(True, axis='y')
-# plt.show()
+plt.figure(figsize=(8,4))
+top_importances.plot(kind="bar", color="orange")
+plt.title("Top 10 - Importance des variables (RandomForest)")
+plt.ylabel("Importance relative")
+plt.grid(True, axis='y')
+plt.show()
 
 # %% [markdown]
 # ### 9.3. Création de nouvelles features
@@ -833,22 +841,22 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
 
 # %%
 # 2.2 Appliquer EXACTEMENT les mêmes features aux deux
-X_train_reduced = X_train
-X_test_reduced  = X_test
-X_val_reduced  = X_val
+# X_train_reduced = X_train
+# X_test_reduced  = X_test
+# X_val_reduced  = X_val
 
-# X_train_fe = create_features(X_train)
-# X_test_fe  = create_features(X_test)
-# X_val_fe  = create_features(X_val)
+X_train_fe = create_features(X_train)
+X_test_fe  = create_features(X_test)
+X_val_fe  = create_features(X_val)
 
-# corr_matrix = X_train_fe.corr().abs()
-# upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-# to_drop = [c for c in upper_tri.columns if any(upper_tri[c] > 0.95)]
+corr_matrix = X_train_fe.corr().abs()
+upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+to_drop = [c for c in upper_tri.columns if any(upper_tri[c] > 0.95)]
 
-# print(f"🧹 Variables supprimées pour corrélation élevée (>0.95) : {len(to_drop)}")
-# X_train_reduced = X_train_fe.drop(columns=to_drop, errors="ignore")
-# X_test_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
-# X_val_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
+print(f"🧹 Variables supprimées pour corrélation élevée (>0.95) : {len(to_drop)}")
+X_train_reduced = X_train_fe.drop(columns=to_drop, errors="ignore")
+X_test_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
+X_val_reduced = X_test_fe.drop(columns=to_drop, errors="ignore")
 
 
 # %% [markdown]
@@ -1010,7 +1018,7 @@ best_model = model_rf  # exemple : Random Forest retenu
 
 # %%
 # === Gestion du scaling (REUSE, ne pas refitter) ===
-feature_names = ["Age", "Weight (kg)"]  # ou list(X_train.columns)
+feature_names = ["Age", "Weight (kg)", "Gender_1.0"]  # ou list(X_train.columns)
 
 # X_* sont déjà standardisés par le bloc précédent
 X_train_scaled = X_train[feature_names].values
@@ -1021,38 +1029,25 @@ y_train_scaled = y_train_std  # déjà standardisé
 y_val_scaled   = y_val_std
 y_test_scaled  = y_test_std
 
-# --- Entraînement du modèle sur données normalisées
-best_model.fit(X_train_scaled, y_train_scaled)
-
-# Sanity check variabilité
-import numpy as np
-print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
-print("Variance de la cible :", np.var(y_train_scaled))
-print("Prédictions sur 10 échantillons :", np.round(best_model.predict(X_train_scaled[:10]), 4))
-
-
 # %% [markdown]
 # ### 10.8. Entraînement
 
 # %%
+# --- Entraînement du modèle sur données normalisées
 best_model.fit(X_train_scaled, y_train_scaled)
-import numpy as np
-print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
-print("Variance de la cible :", np.var(y_train_scaled))
-print("feature_scaler.mean_:", np.round(feature_scaler.mean_, 3))
-print("feature_scaler.scale_:", np.round(feature_scaler.scale_, 3))
-
-
 
 # %% [markdown]
 # ### 10.9. Vérifier la variance du dataset
 
 # %%
+# Sanity check variabilité
+import numpy as np
 print("Variance moyenne des features :", np.mean(np.var(X_train_scaled, axis=0)))
 print("Variance de la cible :", np.var(y_train_scaled))
 y_check = best_model.predict(X_train_scaled[:10])
 print("Prédictions sur 10 échantillons :", np.round(y_check, 4))
-
+y_check_kcal = target_scaler.inverse_transform(y_check.reshape(-1, 1)).ravel()
+print("Prédictions sur 10 échantillons (kcal) :", np.round(y_check_kcal, 2))
 
 # %% [markdown]
 # ### 10.10. Vérification des features
@@ -1172,7 +1167,7 @@ print(f"✔ Rapport JSON enregistré : {report_path}")
 # Celles-ci PRIMENT sur l’inférence automatique depuis X_train.
 manual_specs = {
     "Age": {"type": "integer", "min": 10, "max": 90},
-    # "Gender": {"type": "string", "enum": ["Male", "Female", "Other", "Prefer not to say"]},
+    "Gender": {"type": "string", "enum": ["Male", "Female", "Other", "Prefer not to say"]},
     "Weight (kg)": {"type": "number", "min": 30.0, "max": 200.0},
     # Exemple si tu ajoutes d'autres champs plus tard :
     # "Max_BPM": {"type": "integer", "min": 80, "max": 230},

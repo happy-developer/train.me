@@ -8,43 +8,51 @@ from ..helpers.predict_utils import predict_single
 from ..helpers.report_utils import (
     read_model_report, report_summary_df, report_metrics_df
 )
+from typing import Dict, List
 
 
 def render_ml_tab(
     app_desc_ml: str,
-    features: list[dict],
-    expected_order: list[str],
+    feature_specs: List[dict],
+    ui_feature_names: List[str],
+    internal_expected: List[str],
     target_name: str,
     schema: dict,
-    ui_examples: list[dict],
+    ui_examples: List[Dict],
     db_path: Path,
     model,
     logs_dir: Path,
     model_path: Path,
-    feature_scaler=None,
-    target_scaler=None,
-    report_path: Path | None = None,
-    on_load=None,                      # <- nouveau paramètre
+    feature_scaler,
+    target_scaler,
+    gender_encoder,
+    report_path: Path,
+    on_load=None,
 ) -> None:
-    """Construit l’onglet Machine Learning (UI + callbacks)."""
-    display_headers = [target_name] + [c for c in expected_order if c != target_name]
+    display_headers = [target_name] + [c for c in ui_feature_names if c != target_name]
 
     with gr.Tab(f"Machine Learning - {app_desc_ml}"):
         # ====== Ligne principale (inputs/pred) ======
         with gr.Row():
-            # Gauche : sliders
             with gr.Column():
                 gr.Markdown("### Paramètres d’entrée")
                 comps, names = [], []
-                for spec in features:
+
+                for spec in feature_specs:
                     name = spec["name"]
-                    vmin, vmax, default, step = get_bounds(spec, schema)
-                    comp = gr.Slider(vmin, vmax, value=default, step=step, label=name)
+                    if name == "Gender":
+                        # UI = Radio pour Male / Female
+                        choices = spec.get("enum", ["Male", "Female"])
+                        comp = gr.Radio(choices=choices, value=choices[0], label="Gender")
+                    else:
+                        vmin, vmax, default, step = get_bounds(spec, schema)
+                        comp = gr.Slider(vmin, vmax, value=default, step=step, label=name)
+
                     comps.append(comp)
                     names.append(name)
+
                 btn = gr.Button("Prédire", variant="primary")
 
-            # Droite : résultats
             with gr.Column():
                 gr.Markdown("### Prédiction")
                 y_out = gr.Number(label=target_name, interactive=False, precision=2)
@@ -53,7 +61,7 @@ def render_ml_tab(
         # ====== Exemples ======
         examples_dicts = ui_examples or [schema.get("example_payload", {})]
         rows = [[ex.get(col, "") for col in names] for ex in examples_dicts]
-        if any(any(str(v) != "" for v in r) for r in rows):
+        if any(any(str(v) != "" for v in row) for row in rows):
             gr.Examples(examples=rows, inputs=comps, label="Exemples")
 
         gr.Markdown("---")
@@ -73,7 +81,8 @@ def render_ml_tab(
         refresh_btn = gr.Button("Recharger les données 🔄")
 
         def _load_table():
-            df = load_val_subset(db_path, expected_order, target_name, limit=500)
+            # On reste sur les colonnes “métier” (Age, Weight (kg), Gender, cible)
+            df = load_val_subset(db_path, ui_feature_names, target_name, limit=500)
             for col in df.columns:
                 try:
                     df[col] = pd.to_numeric(df[col])
@@ -81,25 +90,31 @@ def render_ml_tab(
                     pass
             return df
 
-        # Enregistrement du chargement auto fourni par le parent
         if on_load is not None:
             on_load(fn=_load_table, inputs=None, outputs=table)
-
         refresh_btn.click(_load_table, None, table)
 
         # ====== Prédiction ======
         def _fn(*vals):
+            # payload UI brut : Age, Weight (kg), Gender
             payload = {k: v for k, v in zip(names, vals)}
+            # Gradio peut renvoyer Age/Weight en str → on cast ici
+            if "Age" in payload:
+                payload["Age"] = float(payload["Age"])
+            if "Weight (kg)" in payload:
+                payload["Weight (kg)"] = float(payload["Weight (kg)"])
+
             return predict_single(
                 payload=payload,
+                internal_expected=internal_expected,
                 model=model,
-                expected_order=expected_order,
+                feature_scaler=feature_scaler,
+                target_scaler=target_scaler,
                 log_dir=logs_dir,
                 model_path=model_path,
                 schema=schema,
                 target_name=target_name,
-                feature_scaler=feature_scaler,
-                target_scaler=target_scaler,
+                gender_encoder=gender_encoder,
             )
 
         btn.click(_fn, comps, [y_out, meta_out])
@@ -107,15 +122,24 @@ def render_ml_tab(
         gr.Markdown("---")
 
         # ====== Rapport modèle ======
-        if report_path:
-            with gr.Row():
-                with gr.Column():
-                    rep = read_model_report(report_path)
-                    df_sum = report_summary_df(rep)
-                    df_mets = report_metrics_df(rep)
+        rep = read_model_report(report_path)
+        df_sum = report_summary_df(rep)
+        df_mets = report_metrics_df(rep)
 
-                    gr.Markdown("### Rapport modèle")
-                    gr.Dataframe(value=df_sum, interactive=False, label="Résumé",
-                                 row_count=(0, "dynamic"), col_count=df_sum.shape[1])
-                    gr.Dataframe(value=df_mets, interactive=False, label="Métriques par modèle",
-                                 row_count=(0, "dynamic"), col_count=df_mets.shape[1])
+        gr.Markdown("### Rapport modèle")
+        gr.Dataframe(
+            value=df_sum,
+            interactive=False,
+            wrap=True,
+            label="Résumé",
+            row_count=(0, "dynamic"),
+            col_count=df_sum.shape[1],
+        )
+        gr.Dataframe(
+            value=df_mets,
+            interactive=False,
+            wrap=True,
+            label="Métriques par modèle",
+            row_count=(0, "dynamic"),
+            col_count=df_mets.shape[1],
+        )

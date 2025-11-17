@@ -5,67 +5,90 @@ from pathlib import Path
 from .log_utils import log_prediction
 from .preprocess_utils import maybe_apply_feature_scaler, maybe_inverse_target
 from ..model_loader import pipeline_has_scaler
+from typing import Dict, List, Tuple
+import numpy as np
+
+
+def ui_to_internal_row(
+    ui_dict: Dict[str, object],
+    expected_cols: List[str],
+    gender_encoder,
+) -> pd.DataFrame:
+    """
+    Transforme un dict UI {Age, Weight (kg), Gender}
+    en DataFrame 1 ligne avec colonnes internes (ex: ['Age','Weight (kg)','Gender_1.0']).
+    """
+    row = {}
+
+    for col in expected_cols:
+        if col == "Gender_1.0":
+            # On part du champ texte "Gender" en entrée
+            if "Gender" not in ui_dict:
+                raise ValueError("Champ 'Gender' manquant dans l'input UI.")
+
+            g_str = ui_dict["Gender"]
+            if g_str not in ("Male", "Female"):
+                raise ValueError("Genre invalide. Valeurs autorisées : Male / Female.")
+
+            g_df = pd.DataFrame([[g_str]], columns=["Gender"])
+            g_encoded = float(gender_encoder.transform(g_df)[0, 0])
+            row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
+        else:
+            # Age, Weight (kg) → on copie la valeur brute
+            if col not in ui_dict:
+                raise ValueError(f"Champ '{col}' manquant dans l'input UI.")
+            row[col] = ui_dict[col]
+
+    return pd.DataFrame([row], columns=expected_cols)
 
 
 def predict_single(
-    payload: dict,
+    payload: Dict[str, object],
+    internal_expected: List[str],
     model,
-    expected_order: list[str],
+    feature_scaler,
+    target_scaler,
     log_dir: Path,
     model_path: Path,
     schema: dict,
     target_name: str,
-    feature_scaler=None,   # <-- nouveau
-    target_scaler=None,    # <-- nouveau
-):
-    t0 = time.time()
+    gender_encoder,
+) -> Tuple[float, str]:
+    """
+    Implémentation officielle :
+    UI → encodage Gender → scaling features → prédiction → inverse_transform cible.
+    """
+    # 1) Construire le DF interne
+    X_raw = ui_to_internal_row(payload, internal_expected, gender_encoder)
 
-    # 1) Vérif & construction X dans l'ordre
-    missing = [c for c in expected_order if c not in payload]
-    if missing:
-        raise ValueError(f"Champs manquants dans l'input UI : {missing}")
+    # 2) Scaling des features
+    X_scaled = pd.DataFrame(
+        feature_scaler.transform(X_raw),
+        columns=internal_expected,
+        index=X_raw.index,
+    )
 
-    X_raw = pd.DataFrame([[payload[c] for c in expected_order]], columns=expected_order)
-    X_raw = X_raw.apply(pd.to_numeric, errors="raise")
+    # 3) Prédiction standardisée
+    y_std = float(model.predict(X_scaled)[0])
 
-    # 2) Déterminer si le modèle intègre déjà un scaler (Pipeline)
-    uses_internal_scaling = pipeline_has_scaler(model)
+    # 4) Remise en unités réelles
+    y_kcal = float(target_scaler.inverse_transform(np.array([[y_std]]))[0, 0])
+    y_kcal = round(y_kcal, 2)
 
-    # 3) Appliquer le scaling uniquement si nécessaire
-    if uses_internal_scaling:
-        X_for_pred = X_raw
-        scaler_flag = "internal"
-    else:
-        if feature_scaler is None:
-            raise RuntimeError(
-                "Le modèle n'intègre pas de scaler et aucun feature_scaler.joblib n'a été trouvé."
-            )
-        X_for_pred = maybe_apply_feature_scaler(X_raw, feature_scaler)
-        scaler_flag = "external"
-
-    # 4) Prédiction
-    y_pred = float(model.predict(X_for_pred).squeeze())
-
-    # 5) Remise en unités réelles de la cible si normalisée
-    y_final, inverted = maybe_inverse_target(y_pred, target_scaler)
-
-    latency_ms = int((time.time() - t0) * 1000)
-
-    # 6) Logging
+    # 5) Logging
     log_prediction(
         log_dir=log_dir,
-        row_in={k: payload[k] for k in expected_order},
-        y_hat=round(y_final, 2),
-        latency_ms=latency_ms,
+        row_in=payload,
+        y_hat=y_kcal,
+        latency_ms=0,  # tu peux ajouter une mesure de temps si tu veux
         model_filename=model_path.name,
-        model_version=schema.get("model_version", "unknown"),
+        model_version= schema.get("model_version", "unknown"),
         target_name=target_name,
     )
 
-    # 7) Meta lisible
     meta = (
-        f"Latency: {latency_ms} ms | "
-        f"Model: {model_path.name} | Version: {schema.get('model_version','?')} | "
-        f"Scaling: {scaler_flag}{' + target_inverse' if inverted else ''}"
+        f"Model: {model_path.name} | "
+        f"Version: {schema.get('model_version','?')} | "
+        f"Features: {', '.join(internal_expected)}"
     )
-    return round(y_final, 2), meta
+    return y_kcal, meta

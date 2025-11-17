@@ -10,19 +10,21 @@ REPORT_FILENAME = "model_report.json"
 # Fichiers de scalers optionnels
 FEATURE_SCALER_FILENAME = "feature_scaler.joblib"
 TARGET_SCALER_FILENAME  = "target_scaler.joblib"
+GENDER_ENCODER_FILENAME = "gender_encoder.joblib"
 
 # Valeurs par défaut UI (non normalisées)
 UI_DEFAULTS = {
     "Age": 40,
     "Weight (kg)": 70.0,
+    "Gender": "Female",
 }
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
-    {"Age": 25, "Weight (kg)": 60},
-    {"Age": 32, "Weight (kg)": 75},
-    {"Age": 40, "Weight (kg)": 70},
-    {"Age": 52, "Weight (kg)": 110},
-    {"Age": 65, "Weight (kg)": 73},
+    {"Age": 25, "Weight (kg)": 60.0, "Gender": "Male"},
+    {"Age": 32, "Weight (kg)": 75.0, "Gender": "Female"},
+    {"Age": 40, "Weight (kg)": 70.0, "Gender": "Male"},
+    {"Age": 52, "Weight (kg)": 110.0, "Gender": "Male"},
+    {"Age": 65, "Weight (kg)": 73.0, "Gender": "Female"},
 ]
 
 
@@ -51,5 +53,6 @@ def build_paths(src_dir: Path) -> dict[str, Path]:
         "REPORT_PATH": Path(report_path_env) if report_path_env else model_dir / REPORT_FILENAME,
         "FEATURE_SCALER_PATH": model_dir / FEATURE_SCALER_FILENAME,
         "TARGET_SCALER_PATH":  model_dir / TARGET_SCALER_FILENAME,
+        "GENDER_ENCODER_PATH": model_dir / GENDER_ENCODER_FILENAME,
     }
     return paths

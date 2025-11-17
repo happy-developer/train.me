@@ -2,7 +2,7 @@
 # # Test post-génération du modèle entraîné sur la dataset "life_style_data"
 
 # %% [markdown]
-# ## Importation des librairies essentielles
+# ## 1. Importation des librairies essentielles
 
 # %%
 from pathlib import Path
@@ -17,7 +17,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 # %% [markdown]
-# ## Exemple d’entrée simulée depuis l’interface utilisateur
+# ## 2. Exemple d’entrée simulée depuis l’interface utilisateur
 # 
 # Cette cellule permet de définir un dictionnaire Python (`ui_input`) reproduisant la structure exacte des données envoyées par l’interface Gradio. 
 # 
@@ -58,7 +58,7 @@ for k, v in ui_input.items():
 
 
 # %% [markdown]
-# ## Définition des chemins du modèle et des fichiers associés
+# ## 3. Définition des chemins du modèle et des fichiers associés
 # 
 # Cette cellule identifie dynamiquement la racine du projet `train.me` à partir du répertoire courant,  
 # puis construit les chemins complets vers :
@@ -94,7 +94,7 @@ print(f" - Target scaler           : {y_scaler_fp}")
 
 
 # %% [markdown]
-# ## Chargement du modèle entraîné
+# ## 4. Chargement du modèle entraîné
 # 
 # Cette cellule charge le modèle sauvegardé lors de la phase d’entraînement.  
 # 
@@ -128,7 +128,7 @@ print(f"✔ Modèle chargé : {model_fp.name}")
 print(f"→ Features attendues ({len(expected)}) : {expected}")
 
 # %% [markdown]
-# ### Identification du modèle utilisé
+# ### 4.1. Identification du modèle utilisé
 # 
 # Cette cellule permet d’afficher le type de modèle réellement chargé dans le pipeline.  
 # 
@@ -164,7 +164,7 @@ print(f"⚙️  Type de modèle : {model_friendly(model)}")
 
 
 # %% [markdown]
-# ## Validation des entrées et prédiction
+# ## 5. Validation des entrées et prédiction
 # 
 # Cette cellule :
 # 1. Vérifie que les variables d’entrée issues de `ui_input` correspondent bien aux colonnes attendues par le modèle (`expected`).  
@@ -173,31 +173,6 @@ print(f"⚙️  Type de modèle : {model_friendly(model)}")
 # 
 # Cette étape simule exactement ce qui se passera lors de l’appel depuis l’interface Gradio.
 # 
-
-# %%
-# # === 1️⃣ Vérification de la cohérence des entrées ===
-# # On s'assure que toutes les colonnes attendues par le modèle
-# # sont bien présentes dans le dictionnaire ui_input.
-# print(f"⚙️ Entrées : {ui_input}")
-# missing = [c for c in expected if c not in ui_input]
-# if missing:
-#     raise ValueError(f"⚠️ Champs manquants dans l'entrée UI : {missing}")
-
-# # === 2️⃣ Construction du DataFrame pour la prédiction ===
-# # L'ordre des colonnes doit être strictement identique à celui du modèle.
-# X_one = pd.DataFrame([[ui_input[c] for c in expected]], columns=expected)
-
-# # Forcer le typage numérique pour éviter les erreurs de prédiction
-# X_one = X_one.apply(pd.to_numeric, errors="raise")
-
-# # === 3️⃣ Prédiction ===
-# # Le modèle ayant été entraîné sans normalisation/scaling à l'inférence,
-# # la sortie correspond directement à la valeur réelle en Calories.
-# y_pred = float(model.predict(X_one).squeeze())
-
-# # === 4️⃣ Affichage du résultat ===
-# print(f"🔮 Calories_Burned (réelles) : {y_pred:.2f}")
-
 
 # %%
 fx_scaler = None
@@ -218,82 +193,87 @@ else:
 
 
 # %%
-print(f"⚙️ Entrées : {ui_input}")
-# 1) Construire la ligne brute dans l'ordre attendu
-X_one_raw = pd.DataFrame([[ui_input[c] for c in expected]], columns=expected).apply(pd.to_numeric, errors="raise")
-
-# 2) Déterminer si le modèle intègre déjà le scaler (Pipeline)
-def _pipeline_has_scaler(p):
-    if not isinstance(p, Pipeline):
-        return False
-    scaler_types = (StandardScaler, MinMaxScaler, RobustScaler)
-    return any(isinstance(step, scaler_types) for _, step in p.named_steps.items())
-
-uses_internal_scaling = _pipeline_has_scaler(model)
-
-# Appliquer le scaling uniquement si nécessaire
-if uses_internal_scaling:
-    X_one = X_one_raw.copy()
-    print("🔧 Scaling interne détecté dans le Pipeline du modèle ➜ pas de double-scaling.")
-else:
-    if fx_scaler is None:
-        raise RuntimeError("Le modèle n'intègre pas de scaler et aucun feature_scaler.joblib n'a été trouvé.")
-    X_scaled = fx_scaler.transform(X_one_raw)
-    X_one = pd.DataFrame(X_scaled, columns=expected)
-    print("🔧 Scaling appliqué via feature_scaler.joblib.")
-
+import numpy as np
+import pandas as pd
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 np.set_printoptions(precision=6, suppress=True)
 
+def _pipeline_has_scaler(p):
+    return isinstance(p, Pipeline) and any(
+        isinstance(step, (StandardScaler, MinMaxScaler, RobustScaler))
+        for _, step in p.named_steps.items()
+    )
+
+# --- 1) Entrée UI -> DataFrame (respect de l'ordre des colonnes attendues)
+print(f"⚙️ Entrées UI : {ui_input}")
+X_one_raw = pd.DataFrame([[ui_input[c] for c in expected]], columns=expected).apply(pd.to_numeric, errors="raise")
 print("🔎 X_one_raw:\n", X_one_raw)
 
-# Affiche les stats du scaler
+# --- 2) Scaling features (toujours avec DataFrame)
+uses_internal_scaling = _pipeline_has_scaler(model)
+if uses_internal_scaling:
+    X_one = X_one_raw.copy()
+    print("🔧 Pipeline: scaler interne → pas de double-scaling.")
+else:
+    if fx_scaler is None:
+        raise RuntimeError("Pas de scaler interne et aucun feature_scaler.joblib trouvé.")
+    # IMPORTANT: passer un DataFrame avec les mêmes colonnes que lors du fit
+    X_one = pd.DataFrame(fx_scaler.transform(X_one_raw), columns=expected)
+    print("🔧 Scaling appliqué via feature_scaler.joblib.")
+
+# --- 3) Infos scaler (diagnostic léger)
 print("🔧 feature_scaler.mean_:", getattr(fx_scaler, "mean_", None))
 print("🔧 feature_scaler.scale_:", getattr(fx_scaler, "scale_", None))
 
-# Compare transformation manuelle vs transform()
-z_manual = (X_one_raw.values - fx_scaler.mean_) / fx_scaler.scale_
-z_auto   = fx_scaler.transform(X_one_raw.values)
-print("🧪 Z-manual:", z_manual)
-print("🧪 Z-auto  :", z_auto)
+# Vérif cohérence (manuelle vs transform) — DataFrame uniquement, pas .values
+z_manual = (X_one_raw - fx_scaler.mean_) / fx_scaler.scale_
+z_auto   = pd.DataFrame(fx_scaler.transform(X_one_raw), columns=expected)
+print("🧪 Z-manual:\n", z_manual)
+print("🧪 Z-auto  :\n", z_auto)
 
+# --- 4) Prédiction 1 échantillon
+y_std_one = float(model.predict(X_one))
+if y_scaler is not None:
+    # reshape(1, -1) car inverse_transform attend un array 2D
+    y_kcal_one = float(y_scaler.inverse_transform(np.array([[y_std_one]]))[0, 0])
+    print(f"🔮 UI → y_std: {y_std_one:.6f} | y_kcal: {y_kcal_one:.2f}")
+else:
+    print(f"🔮 UI → y_std: {y_std_one:.6f} (pas de target_scaler)")
 
-# Deux entrées très différentes
+# --- 5) Batch test (deux entrées très différentes)
 batch_raw = pd.DataFrame(
     [{"Age": 34, "Weight (kg)": 115.0},
      {"Age": 52, "Weight (kg)": 60.0}],
     columns=expected
 ).apply(pd.to_numeric, errors="raise")
 
-if fx_scaler is not None:
-    batch = pd.DataFrame(fx_scaler.transform(batch_raw), columns=expected)
-else:
-    batch = batch_raw.copy()
+# Scaler avec DataFrame
+batch_scaled = batch_raw if uses_internal_scaling else pd.DataFrame(
+    fx_scaler.transform(batch_raw), columns=expected
+)
 
-y_std = model.predict(batch)
+# Sanity: alignement
+print("🧾 expected:", expected)
+print("🧾 batch columns:", list(batch_scaled.columns))
+assert list(batch_scaled.columns) == list(expected), "Désalignement colonnes."
+
+# Prédictions batch
+y_std = model.predict(batch_scaled)
 print("📈 batch y_std:", np.round(y_std, 6))
 
-# Si y_scaler présent, reviens en kcal
 if y_scaler is not None:
-    y_kcal = y_scaler.inverse_transform(y_std.reshape(-1,1)).ravel()
+    # inverse_transform attend un array 2D (n_samples, 1)
+    y_kcal = y_scaler.inverse_transform(
+        np.array(y_std).reshape(-1, 1)
+    ).ravel()
     print("📈 batch y_kcal:", np.round(y_kcal, 2))
 
-print("🧾 expected:", expected)
-print("🧾 batch columns:", list(batch.columns))
-assert list(batch.columns) == list(expected), "Désalignement colonnes → prédictions aberrantes possibles"
 
-batch_raw = pd.DataFrame(
-    [{"Age": 34, "Weight (kg)": 115.0},
-     {"Age": 52, "Weight (kg)": 60.0}],
-    columns=expected
-).apply(pd.to_numeric)
-
-batch = pd.DataFrame(fx_scaler.transform(batch_raw), columns=expected)
-y_std = model.predict(batch)
-y_kcal = y_scaler.inverse_transform(y_std.reshape(-1,1)).ravel()
-
-print("📈 y_std :", np.round(y_std, 4))
-print("📈 y_kcal:", np.round(y_kcal, 2))
+# --- 6) Garde-fou simple: détecter une constante
+if len(set(np.round(y_std, 6))) == 1:
+    print("⚠️ Alerte: prédiction constante sur ce batch. Vérifier mean_/scale_ du scaler et la variabilité des features.")
 
 
 
