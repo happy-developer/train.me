@@ -1259,7 +1259,7 @@ for f in schema_features:
 # Objet final du schéma
 feature_schema = {
     "model_name": "life_style_data",
-    "model_version": "v1.1-minimal",  # ajuste si tu es sur un set élargi
+    "model_version": "v1.2-minimal",  # ajuste si tu es sur un set élargi
     "created_at": datetime.utcnow().isoformat() + "Z",
     "target": y.name if isinstance(y, pd.Series) else "Calories_Burned",
     "features": schema_features,     # ordre = contrat d’entrée
