@@ -42,7 +42,7 @@ from .helpers.sqlite_utils import load_val_subset
 # ---------- UI ----------
 def build_app():
     app_title = f"TrAIn.me — {schema.get('model_name','model')} ({schema.get('model_version','v?')})"
-    app_desc_ml = f"Prédiction de `{TARGET_NAME}` à partir de : {', '.join(UI_FEATURE_NAMES)}"
+    app_desc_ml = f"Prédiction de `{TARGET_NAME}`"
     app_desc_dl = "Génération d'un programme sportif sur demande."
 
     from .pages.ml_tab import render_ml_tab

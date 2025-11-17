@@ -19,3 +19,10 @@
 ,0,"Random","Forest","0.507611","0.638451","0.588070"
 ,1,"Gradient","Boosting","0.557830","0.681172","0.531099"
 ,2,"Régression","Linéaire","0.585743","0.718066","0.478930"
+,,,,,,
+"preprocessing_life_style_data_v2.3.pdf",,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)""",,,,,,
+,"Modèle","MAE","RMSE","R²",,
+,0,"Random","Forest","0.497389","0.623019","0.607743"
+,1,"Gradient","Boosting","0.554107","0.677117","0.536665"
+,2,"Régression","Linéaire","0.585753","0.718063","0.478934"

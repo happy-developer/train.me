@@ -18,13 +18,26 @@ UI_DEFAULTS = {
     "Weight (kg)": 70.0,
     "Gender": "Female",
     "Experience_Level": 1.98,
+     "Workout_Frequency (days/week)": 5.0,
 }
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
-    {"Age": 25, "Weight (kg)": 60.0, "Gender": "Male",   "Experience_Level": 1.98},
-    {"Age": 32, "Weight (kg)": 75.0, "Gender": "Female", "Experience_Level": 2.01},
-    {"Age": 40, "Weight (kg)": 70.0, "Gender": "Male",   "Experience_Level": 2.05},
+    {
+        "Age": 25,
+        "Weight (kg)": 60.0,
+        "Gender": "Male",
+        "Experience_Level": 1.98,
+        "Workout_Frequency (days/week)": 3.0,
+    },
+    {
+        "Age": 40,
+        "Weight (kg)": 70.0,
+        "Gender": "Female",
+        "Experience_Level": 2.01,
+        "Workout_Frequency (days/week)": 5.0,
+    },
 ]
+
 
 
 
