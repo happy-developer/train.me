@@ -26,3 +26,17 @@
 ,0,"Random","Forest","0.497389","0.623019","0.607743"
 ,1,"Gradient","Boosting","0.554107","0.677117","0.536665"
 ,2,"Régression","Linéaire","0.585753","0.718063","0.478934"
+,,,,,,
+"preprocessing_life_style_data_v2.4.pdf",,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)""",,,,,,
+,"Modèle","MAE","RMSE","R²",,
+,0,"Gradient","Boosting","0.448513","0.567945","0.674028"
+,1,"Régression","Linéaire","0.450079","0.568034","0.673926"
+,2,"Random","Forest","0.474187","0.600632","0.635427"
+,,,,,,
+"preprocessing_life_style_data_v2.5.pdf",,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)""",,,,,,
+,"Modèle","MAE","RMSE","R²",,
+,0,"Gradient","Boosting","0.448513","0.567945","0.674028"
+,1,"Régression","Linéaire","0.450079","0.568034","0.673926"
+,2,"Random","Forest","0.474187","0.600632","0.635427"

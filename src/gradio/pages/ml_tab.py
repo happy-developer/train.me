@@ -107,6 +107,9 @@ def render_ml_tab(
                 payload["Experience_Level"] = float(payload["Experience_Level"])
             if "Workout_Frequency (days/week)" in payload:
                 payload["Workout_Frequency (days/week)"] = float(payload["Workout_Frequency (days/week)"])
+            if "Session_Duration (hours)" in payload:
+                payload["Session_Duration (hours)"] = float(payload["Session_Duration (hours)"])
+
 
             return predict_single(
                 payload=payload,
