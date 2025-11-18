@@ -1,42 +1,49 @@
 ,,,,,,
-"preprocessing_life_style_data_v2.0.pdf",,,,,,
+preprocessing_life_style_data_v2.0.pdf,,,,,,
 """Age"", ""Weight (kg)"" ",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Random","Forest","0.588302","0.759869","0.416494"
-,1,"Gradient","Boosting","0.676781","0.841083","0.285100"
-,2,"Régression","Linéaire","0.786070","0.994552","0.000409"
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.588302,0.759869,0.416494
+,1,Gradient,Boosting,0.676781,0.841083,0.285100
+,2,Régression,Linéaire,0.786070,0.994552,0.000409
 ,,,,,,
-"preprocessing_life_style_data_v2.1.pdf",,,,,,
+preprocessing_life_style_data_v2.1.pdf,,,,,,
 """Age"", ""Weight (kg)"", ""Gender"" ",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Random","Forest","0.584926","0.754729","0.424362"
-,1,"Gradient","Boosting","0.677323","0.841614","0.284197"
-,2,"Régression","Linéaire","0.786334","0.994422","0.000671"
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.584926,0.754729,0.424362
+,1,Gradient,Boosting,0.677323,0.841614,0.284197
+,2,Régression,Linéaire,0.786334,0.994422,0.000671
 ,,,,,,
-"preprocessing_life_style_data_v2.2.pdf",,,,,,
+preprocessing_life_style_data_v2.2.pdf,,,,,,
 """Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level""",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Random","Forest","0.507611","0.638451","0.588070"
-,1,"Gradient","Boosting","0.557830","0.681172","0.531099"
-,2,"Régression","Linéaire","0.585743","0.718066","0.478930"
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.507611,0.638451,0.588070
+,1,Gradient,Boosting,0.557830,0.681172,0.531099
+,2,Régression,Linéaire,0.585743,0.718066,0.478930
 ,,,,,,
-"preprocessing_life_style_data_v2.3.pdf",,,,,,
+preprocessing_life_style_data_v2.3.pdf,,,,,,
 """Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)""",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Random","Forest","0.497389","0.623019","0.607743"
-,1,"Gradient","Boosting","0.554107","0.677117","0.536665"
-,2,"Régression","Linéaire","0.585753","0.718063","0.478934"
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.497389,0.623019,0.607743
+,1,Gradient,Boosting,0.554107,0.677117,0.536665
+,2,Régression,Linéaire,0.585753,0.718063,0.478934
 ,,,,,,
-"preprocessing_life_style_data_v2.4.pdf",,,,,,
+preprocessing_life_style_data_v2.4.pdf,,,,,,
 """Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)""",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Gradient","Boosting","0.448513","0.567945","0.674028"
-,1,"Régression","Linéaire","0.450079","0.568034","0.673926"
-,2,"Random","Forest","0.474187","0.600632","0.635427"
+,Modèle,MAE,RMSE,R²,,
+,0,Gradient,Boosting,0.448513,0.567945,0.674028
+,1,Régression,Linéaire,0.450079,0.568034,0.673926
+,2,Random,Forest,0.474187,0.600632,0.635427
 ,,,,,,
-"preprocessing_life_style_data_v2.5.pdf",,,,,,
+preprocessing_life_style_data_v2.5.pdf,,,,,,
 """Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)""",,,,,,
-,"Modèle","MAE","RMSE","R²",,
-,0,"Gradient","Boosting","0.448367","0.567756","0.674245"
-,1,"Régression","Linéaire","0.450080","0.568061","0.673895"
-,2,"Random","Forest","0.474484","0.600432","0.635669"
+,Modèle,MAE,RMSE,R²,,
+,0,Gradient,Boosting,0.448367,0.567756,0.674245
+,1,Régression,Linéaire,0.450080,0.568061,0.673895
+,2,Random,Forest,0.474484,0.600432,0.635669
+,,,,,,
+"v1,6 (sans features selection)",,,,,,
+ALL,,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.001546,0.005405,0.999970
+,1,Gradient,Boosting,0.014526,0.019516,0.999615
+,2,Régression,Linéaire,0.103931,0.135711,0.981373
