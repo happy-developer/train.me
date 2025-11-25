@@ -24,7 +24,8 @@ UI_DEFAULTS = {
     "Experience_Level": 1.98,
     "Workout_Frequency (days/week)": 5.0,
     "Session_Duration (hours)": 1.0,
-    "Workout_Type": "Cardio",   # 🔹 v2.9
+    "Workout_Type": "Cardio",
+     "Difficulty Level": "Advanced",
 }
 
 
@@ -41,6 +42,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.0,
         "Experience_Level": 2.01,
         "Workout_Type": "Strength",
+        "Difficulty Level": "Advanced",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
@@ -54,6 +56,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.37,
         "Experience_Level": 2.01,
         "Workout_Type": "HIIT",
+        "Difficulty Level": "Intermediate",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -67,6 +70,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 0.91,
         "Experience_Level": 1.02,
         "Workout_Type": "Cardio",
+        "Difficulty Level": "Intermediate",
         "Workout_Frequency (days/week)": 2.99,
     },
     {
@@ -80,6 +84,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.10,
         "Experience_Level": 1.99,
         "Workout_Type": "HIIT",
+        "Difficulty Level": "Advanced",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
@@ -93,6 +98,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.08,
         "Experience_Level": 2.0,
         "Workout_Type": "Strength",
+        "Difficulty Level": "Advanced",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -106,6 +112,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 0.69,
         "Experience_Level": 1.0,
         "Workout_Type": "Yoga",
+        "Difficulty Level": "Beginner",
         "Workout_Frequency (days/week)": 3.02,
     },
     {
@@ -119,6 +126,7 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.67,
         "Experience_Level": 3.0,
         "Workout_Type": "Strength",
+        "Difficulty Level": "Advanced",
         "Workout_Frequency (days/week)": 4.96,
     },
     {
@@ -132,9 +140,11 @@ UI_EXAMPLES = [
         "Session_Duration (hours)": 1.01,
         "Experience_Level": 2.01,
         "Workout_Type": "Yoga",
+        "Difficulty Level": "Intermediate",
         "Workout_Frequency (days/week)": 3.97,
     },
 ]
+
 
 
 # Base de validation (relative au repo src/)

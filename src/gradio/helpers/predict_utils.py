@@ -14,57 +14,49 @@ def ui_to_internal_row(
     expected_cols: List[str],
     gender_encoder,
 ) -> pd.DataFrame:
-    """
-    Transforme un dict UI {Age, Weight (kg), ..., Workout_Type}
-    en DataFrame 1 ligne avec colonnes internes alignées sur expected_cols.
-    """
+
     row = {}
+
+    # Mapping ordinal pour Difficulty Level
+    DIFF_LVL_MAP = {
+        "Beginner": 0,
+        "Intermediate": 1,
+        "Advanced": 2,
+    }
 
     for col in expected_cols:
 
-        # -------------------------
-        # 1) Recontruction Gender_1.0
-        # -------------------------
+        # --- 1) Gender_1.0 → binaire via gender_encoder ---
         if col == "Gender_1.0":
-            if "Gender" not in ui_dict:
-                raise ValueError("Champ 'Gender' manquant dans l'input UI.")
-
-            g_str = ui_dict["Gender"]
-            if g_str not in ("Male", "Female"):
-                raise ValueError("Genre invalide. Valeurs autorisées : Male / Female.")
-
-            g_df = pd.DataFrame([[g_str]], columns=["Gender"])
+            g = ui_dict.get("Gender")
+            g_df = pd.DataFrame([[g]], columns=["Gender"])
             g_encoded = float(gender_encoder.transform(g_df)[0, 0])
-
             row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
+            continue
 
-        # -------------------------
-        # 2) Reconstruction Workout_Type_* (HIIT / Strength / Yoga)
-        # -------------------------
-        elif col.startswith("Workout_Type_"):
-            if "Workout_Type" not in ui_dict:
-                raise ValueError(
-                    "Champ 'Workout_Type' manquant dans l'input UI "
-                    f"alors que la colonne '{col}' est attendue."
-                )
+        # --- 2) Colonnes Workout_Type_* (One-Hot) ---
+        if col.startswith("Workout_Type_"):
+            # Exemple : Workout_Type_HIIT
+            raw_type = ui_dict["Workout_Type"]
+            category = col.replace("Workout_Type_", "")
+            row[col] = 1.0 if category == raw_type else 0.0
+            continue
 
-            workout_type = ui_dict["Workout_Type"]
-            suffix = col.split("Workout_Type_", 1)[1]  # ex: "HIIT"
+        # --- 3) Difficulty Level (ordinal) ---
+        if col == "Difficulty Level":
+            diff_str = ui_dict.get("Difficulty Level")
+            if diff_str not in DIFF_LVL_MAP:
+                raise ValueError(f"Niveau de difficulté invalide: {diff_str}")
+            row[col] = float(DIFF_LVL_MAP[diff_str])
+            continue
 
-            # Cardio = toutes les colonnes = 0.0
-            row[col] = 1.0 if workout_type == suffix else 0.0
+        # --- 4) Toutes les autres colonnes (numériques) ---
+        if col not in ui_dict:
+            raise ValueError(f"Champ '{col}' manquant dans l'input UI.")
 
-        # -------------------------
-        # 3) Toutes les autres colonnes (numériques brutes)
-        # -------------------------
-        else:
-            if col not in ui_dict:
-                raise ValueError(f"Champ '{col}' manquant dans l'input UI.")
-
-            row[col] = ui_dict[col]
+        row[col] = ui_dict[col]
 
     return pd.DataFrame([row], columns=expected_cols)
-
 
 
 def predict_single(

@@ -59,6 +59,13 @@ def render_ml_tab(
                             label="Workout_Type",
                         )
 
+                    elif name == "Difficulty Level":
+                        comp = gr.Dropdown(
+                            choices=["Beginner", "Intermediate", "Advanced"],   # ← fixe le problème
+                            value="Beginner",                                   # ou autre valeur par défaut
+                            label="Difficulty Level",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(
