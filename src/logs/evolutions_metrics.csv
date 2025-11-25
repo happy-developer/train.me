@@ -1,4 +1,11 @@
 ,,,,,,
+"v1,6 (sans features selection)",,,,,,
+ALL,,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.001546,0.005405,0.999970
+,1,Gradient,Boosting,0.014526,0.019516,0.999615
+,2,Régression,Linéaire,0.103931,0.135711,0.981373
+,,,,,,
 preprocessing_life_style_data_v2.0.pdf,,,,,,
 """Age"", ""Weight (kg)"" ",,,,,,
 ,Modèle,MAE,RMSE,R²,,
@@ -48,9 +55,9 @@ preprocessing_life_style_data_v2.6.pdf,,,,,,
 ,1,Régression,Linéaire,0.450079,0.568064,0.673892
 ,2,Random,Forest,0.474165,0.600184,0.635970
 ,,,,,,
-"v1,6 (sans features selection)",,,,,,
-ALL,,,,,,
+preprocessing_life_style_data_v2.7.pdf,,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)"", ""Max_BPM"", ""Avg_BPM"" ",,,,,,
 ,Modèle,MAE,RMSE,R²,,
-,0,Random,Forest,0.001546,0.005405,0.999970
-,1,Gradient,Boosting,0.014526,0.019516,0.999615
-,2,Régression,Linéaire,0.103931,0.135711,0.981373
+,0,Gradient,Boosting,0.448780,0.568253,0.673675
+,1,Random,Forest,0.473308,0.599794,0.636444
+,2,Régression,Linéaire,1.023554,1.291498,-0.685601

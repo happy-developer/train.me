@@ -113,6 +113,8 @@ def render_ml_tab(
                 payload["Session_Duration (hours)"] = float(payload["Session_Duration (hours)"])
             if "Max_BPM" in payload:
                 payload["Max_BPM"] = float(payload["Max_BPM"])
+            if "Avg_BPM" in payload:              # ← nouveau en v2.7
+                payload["Avg_BPM"] = float(payload["Avg_BPM"])
 
 
             return predict_single(
