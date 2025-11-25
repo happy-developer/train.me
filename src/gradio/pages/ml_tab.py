@@ -66,6 +66,13 @@ def render_ml_tab(
                             label="Difficulty Level",
                         )
 
+                    elif name == "Body Part":
+                        comp = gr.Dropdown(
+                            choices=["Abs", "Arms", "Back", "Chest", "Forearms", "Legs", "Shoulders"],
+                            value="Abs",
+                            label="Body Part",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(

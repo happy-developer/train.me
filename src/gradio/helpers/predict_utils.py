@@ -17,46 +17,47 @@ def ui_to_internal_row(
 
     row = {}
 
-    # Mapping ordinal pour Difficulty Level
-    DIFF_LVL_MAP = {
-        "Beginner": 0,
-        "Intermediate": 1,
-        "Advanced": 2,
-    }
+    # === A) GENDER_1.0 ==========================================
+    if "Gender_1.0" in expected_cols:
+        g_str = ui_dict["Gender"]
+        g_df = pd.DataFrame([[g_str]], columns=["Gender"])
+        g_encoded = float(gender_encoder.transform(g_df)[0, 0])
+        row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
 
+    # === B) WORKOUT_TYPE_* (HIIT / Strength / Yoga / Cardio) ===
+    workout_types = ["Cardio", "Strength", "HIIT", "Yoga"]
+    selected_wt = ui_dict["Workout_Type"]
+
+    for wt in workout_types:
+        col = f"Workout_Type_{wt}"
+        if col in expected_cols:
+            row[col] = 1.0 if selected_wt == wt else 0.0
+
+    # === C) BODY_PART_* (One-Hot) ===============================
+    body_parts = ["Abs", "Arms", "Back", "Chest", "Forearms", "Legs", "Shoulders"]
+    selected_bp = ui_dict["Body Part"]
+
+    for bp in body_parts:
+        col = f"Body Part_{bp}"
+        if col in expected_cols:
+            row[col] = 1.0 if selected_bp == bp else 0.0
+
+    # === D) DIFFICULTY LEVEL (Ordinal) ==========================
+    DIFF_LVL_MAP = {"Beginner": 0, "Intermediate": 1, "Advanced": 2}
+
+    if "Difficulty Level" in expected_cols:
+        lvl_str = ui_dict["Difficulty Level"]
+        row["Difficulty Level"] = float(DIFF_LVL_MAP[lvl_str])
+
+    # === E) COPIE DIRECTE DES AUTRES COLONNES ===================
     for col in expected_cols:
-
-        # --- 1) Gender_1.0 → binaire via gender_encoder ---
-        if col == "Gender_1.0":
-            g = ui_dict.get("Gender")
-            g_df = pd.DataFrame([[g]], columns=["Gender"])
-            g_encoded = float(gender_encoder.transform(g_df)[0, 0])
-            row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
+        if col in row:
             continue
-
-        # --- 2) Colonnes Workout_Type_* (One-Hot) ---
-        if col.startswith("Workout_Type_"):
-            # Exemple : Workout_Type_HIIT
-            raw_type = ui_dict["Workout_Type"]
-            category = col.replace("Workout_Type_", "")
-            row[col] = 1.0 if category == raw_type else 0.0
-            continue
-
-        # --- 3) Difficulty Level (ordinal) ---
-        if col == "Difficulty Level":
-            diff_str = ui_dict.get("Difficulty Level")
-            if diff_str not in DIFF_LVL_MAP:
-                raise ValueError(f"Niveau de difficulté invalide: {diff_str}")
-            row[col] = float(DIFF_LVL_MAP[diff_str])
-            continue
-
-        # --- 4) Toutes les autres colonnes (numériques) ---
-        if col not in ui_dict:
-            raise ValueError(f"Champ '{col}' manquant dans l'input UI.")
-
-        row[col] = ui_dict[col]
+        if col in ui_dict:
+            row[col] = ui_dict[col]
 
     return pd.DataFrame([row], columns=expected_cols)
+
 
 
 def predict_single(

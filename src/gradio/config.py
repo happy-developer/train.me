@@ -15,17 +15,18 @@ GENDER_ENCODER_FILENAME = "gender_encoder.joblib"
 # Valeurs par défaut UI (non normalisées)
 UI_DEFAULTS = {
     "Age": 40,
+    "Gender": "Female",
     "Weight (kg)": 70.0,
     "Height (m)": 1.68,
     "Max_BPM": 199.12,
     "Avg_BPM": 120.5,
     "Resting_BPM": 60.0,
-    "Gender": "Female",
-    "Experience_Level": 1.98,
-    "Workout_Frequency (days/week)": 5.0,
     "Session_Duration (hours)": 1.0,
+    "Experience_Level": 1.98,
     "Workout_Type": "Cardio",
-     "Difficulty Level": "Advanced",
+    "Difficulty Level": "Intermediate",
+    "Workout_Frequency (days/week)": 5.0,
+    "Body Part": "Abs",   # 🔹 nouveau
 }
 
 
@@ -43,13 +44,14 @@ UI_EXAMPLES = [
         "Experience_Level": 2.01,
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
+        "Body Part": "Legs",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
         "Age": 23.37,
         "Gender": "Female",
         "Weight (kg)": 56.41,
-        "Height (m)": 1.55,
+        "Height (m)": 1.55,   # attention au min slider (si pb → mettre 1.58)
         "Max_BPM": 179.43,
         "Avg_BPM": 131.75,
         "Resting_BPM": 73.18,
@@ -57,6 +59,7 @@ UI_EXAMPLES = [
         "Experience_Level": 2.01,
         "Workout_Type": "HIIT",
         "Difficulty Level": "Intermediate",
+        "Body Part": "Chest",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -71,6 +74,7 @@ UI_EXAMPLES = [
         "Experience_Level": 1.02,
         "Workout_Type": "Cardio",
         "Difficulty Level": "Intermediate",
+        "Body Part": "Arms",
         "Workout_Frequency (days/week)": 2.99,
     },
     {
@@ -85,6 +89,7 @@ UI_EXAMPLES = [
         "Experience_Level": 1.99,
         "Workout_Type": "HIIT",
         "Difficulty Level": "Advanced",
+        "Body Part": "Shoulders",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
@@ -99,6 +104,7 @@ UI_EXAMPLES = [
         "Experience_Level": 2.0,
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
+        "Body Part": "Abs",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -113,6 +119,7 @@ UI_EXAMPLES = [
         "Experience_Level": 1.0,
         "Workout_Type": "Yoga",
         "Difficulty Level": "Beginner",
+        "Body Part": "Arms",
         "Workout_Frequency (days/week)": 3.02,
     },
     {
@@ -127,6 +134,7 @@ UI_EXAMPLES = [
         "Experience_Level": 3.0,
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
+        "Body Part": "Shoulders",
         "Workout_Frequency (days/week)": 4.96,
     },
     {
@@ -141,9 +149,11 @@ UI_EXAMPLES = [
         "Experience_Level": 2.01,
         "Workout_Type": "Yoga",
         "Difficulty Level": "Intermediate",
+        "Body Part": "Back",
         "Workout_Frequency (days/week)": 3.97,
     },
 ]
+
 
 
 
