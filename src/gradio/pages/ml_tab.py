@@ -111,6 +111,8 @@ def render_ml_tab(
                 payload["Workout_Frequency (days/week)"] = float(payload["Workout_Frequency (days/week)"])
             if "Session_Duration (hours)" in payload:
                 payload["Session_Duration (hours)"] = float(payload["Session_Duration (hours)"])
+            if "Max_BPM" in payload:
+                payload["Max_BPM"] = float(payload["Max_BPM"])
 
 
             return predict_single(
