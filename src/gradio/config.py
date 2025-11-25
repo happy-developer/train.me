@@ -17,12 +17,14 @@ UI_DEFAULTS = {
     "Age": 40,
     "Weight (kg)": 70.0,
     "Height (m)": 1.68,
-    "Max_BPM": 199.12,  
-    "Avg_BPM": 120.5, 
+    "Max_BPM": 199.12,
+    "Avg_BPM": 120.5,
+    "Resting_BPM": 60.0,          # ← nouveau
     "Gender": "Female",
     "Experience_Level": 1.98,
     "Workout_Frequency (days/week)": 5.0,
 }
+
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
     {
@@ -30,7 +32,8 @@ UI_EXAMPLES = [
         "Weight (kg)": 70.0,
         "Height (m)": 1.75,
         "Max_BPM": 199.12,
-        "Avg_BPM": 120.5,   
+        "Avg_BPM": 120.5,
+        "Resting_BPM": 58.0,       # ← nouveau
         "Gender": "Male",
         "Experience_Level": 2.0,
         "Workout_Frequency (days/week)": 3.0,
@@ -40,14 +43,16 @@ UI_EXAMPLES = [
         "Age": 45,
         "Weight (kg)": 82.0,
         "Height (m)": 1.68,
-        "Max_BPM": 165.22,  
+        "Max_BPM": 165.22,
         "Avg_BPM": 140.0,
+        "Resting_BPM": 62.0,       # ← nouveau
         "Gender": "Female",
         "Experience_Level": 2.1,
         "Workout_Frequency (days/week)": 4.0,
         "Session_Duration (hours)": 1.5,
     },
 ]
+
 
 
 

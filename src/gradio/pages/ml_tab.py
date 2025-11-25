@@ -115,6 +115,8 @@ def render_ml_tab(
                 payload["Max_BPM"] = float(payload["Max_BPM"])
             if "Avg_BPM" in payload:              # ← nouveau en v2.7
                 payload["Avg_BPM"] = float(payload["Avg_BPM"])
+            if "Resting_BPM" in payload:          # ← v2.8 (nouvelle ligne)
+                payload["Resting_BPM"] = float(payload["Resting_BPM"])
 
 
             return predict_single(
