@@ -40,18 +40,40 @@ def render_ml_tab(
 
                 for spec in feature_specs:
                     name = spec["name"]
+
                     if name == "Gender":
                         # UI = Radio pour Male / Female
                         choices = spec.get("enum", ["Male", "Female"])
-                        comp = gr.Radio(choices=choices, value=choices[0], label="Gender")
+                        comp = gr.Radio(
+                            choices=choices,
+                            value=choices[0],
+                            label="Gender",
+                        )
+
+                    elif name == "Workout_Type":
+                        # UI = Liste déroulante pour le type de séance
+                        choices = spec.get("enum", ["Cardio", "Strength", "HIIT", "Yoga"])
+                        comp = gr.Dropdown(
+                            choices=choices,
+                            value=choices[0],
+                            label="Workout_Type",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
-                        comp = gr.Slider(vmin, vmax, value=default, step=step, label=name)
+                        comp = gr.Slider(
+                            vmin,
+                            vmax,
+                            value=default,
+                            step=step,
+                            label=name,
+                        )
 
                     comps.append(comp)
                     names.append(name)
 
                 btn = gr.Button("Prédire", variant="primary")
+
 
             with gr.Column():
                 gr.Markdown("### Prédiction")

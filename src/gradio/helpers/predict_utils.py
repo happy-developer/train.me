@@ -15,14 +15,17 @@ def ui_to_internal_row(
     gender_encoder,
 ) -> pd.DataFrame:
     """
-    Transforme un dict UI {Age, Weight (kg), Gender}
-    en DataFrame 1 ligne avec colonnes internes (ex: ['Age','Weight (kg)','Gender_1.0']).
+    Transforme un dict UI {Age, Weight (kg), ..., Workout_Type}
+    en DataFrame 1 ligne avec colonnes internes alignées sur expected_cols.
     """
     row = {}
 
     for col in expected_cols:
+
+        # -------------------------
+        # 1) Recontruction Gender_1.0
+        # -------------------------
         if col == "Gender_1.0":
-            # On part du champ texte "Gender" en entrée
             if "Gender" not in ui_dict:
                 raise ValueError("Champ 'Gender' manquant dans l'input UI.")
 
@@ -32,14 +35,36 @@ def ui_to_internal_row(
 
             g_df = pd.DataFrame([[g_str]], columns=["Gender"])
             g_encoded = float(gender_encoder.transform(g_df)[0, 0])
+
             row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
+
+        # -------------------------
+        # 2) Reconstruction Workout_Type_* (HIIT / Strength / Yoga)
+        # -------------------------
+        elif col.startswith("Workout_Type_"):
+            if "Workout_Type" not in ui_dict:
+                raise ValueError(
+                    "Champ 'Workout_Type' manquant dans l'input UI "
+                    f"alors que la colonne '{col}' est attendue."
+                )
+
+            workout_type = ui_dict["Workout_Type"]
+            suffix = col.split("Workout_Type_", 1)[1]  # ex: "HIIT"
+
+            # Cardio = toutes les colonnes = 0.0
+            row[col] = 1.0 if workout_type == suffix else 0.0
+
+        # -------------------------
+        # 3) Toutes les autres colonnes (numériques brutes)
+        # -------------------------
         else:
-            # Age, Weight (kg) → on copie la valeur brute
             if col not in ui_dict:
                 raise ValueError(f"Champ '{col}' manquant dans l'input UI.")
+
             row[col] = ui_dict[col]
 
     return pd.DataFrame([row], columns=expected_cols)
+
 
 
 def predict_single(
