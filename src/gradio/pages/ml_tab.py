@@ -163,6 +163,8 @@ def render_ml_tab(
                 payload["Avg_BPM"] = float(payload["Avg_BPM"])
             if "Resting_BPM" in payload:          # ← v2.8 (nouvelle ligne)
                 payload["Resting_BPM"] = float(payload["Resting_BPM"])
+            if "Water_Intake (liters)" in payload:          # 🔹 v2.12
+                payload["Water_Intake (liters)"] = float(payload["Water_Intake (liters)"])
 
 
             return predict_single(

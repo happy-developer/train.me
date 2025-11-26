@@ -27,7 +27,8 @@ UI_DEFAULTS = {
     "Difficulty Level": "Intermediate",
     "Workout_Frequency (days/week)": 5.0,
     "Body Part": "Abs",
-    "Equipment Needed": "Wall"      # 🔹 nouveau
+    "Equipment Needed": "Wall",
+    "Water_Intake (liters)": 3.23 # 🆕 nouvelle feature catégorielle
 }
 
 
@@ -48,6 +49,7 @@ UI_EXAMPLES = [
         "Body Part": "Legs",
         "Equipment Needed": "Cable Machine",
         "Workout_Frequency (days/week)": 3.99,
+        "Water_Intake (liters)": 2.5,
     },
     {
         "Age": 23.37,
@@ -64,6 +66,7 @@ UI_EXAMPLES = [
         "Body Part": "Chest",
         "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 4.0,
+        "Water_Intake (liters)": 2.2,
     },
     {
         "Age": 33.22,
@@ -80,6 +83,7 @@ UI_EXAMPLES = [
         "Body Part": "Arms",
         "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 2.99,
+        "Water_Intake (liters)": 1.8,
     },
     {
         "Age": 38.69,
@@ -96,6 +100,7 @@ UI_EXAMPLES = [
         "Body Part": "Shoulders",
         "Equipment Needed": "Parallel Bars or Chair",
         "Workout_Frequency (days/week)": 3.99,
+        "Water_Intake (liters)": 2.7,
     },
     {
         "Age": 45.09,
@@ -112,6 +117,7 @@ UI_EXAMPLES = [
         "Body Part": "Abs",
         "Equipment Needed": "Wall",
         "Workout_Frequency (days/week)": 4.0,
+        "Water_Intake (liters)": 2.3,
     },
     {
         "Age": 53.19,
@@ -128,6 +134,7 @@ UI_EXAMPLES = [
         "Body Part": "Arms",
         "Equipment Needed": "Resistance Band or Cable Machine",
         "Workout_Frequency (days/week)": 3.02,
+        "Water_Intake (liters)": 1.6,
     },
     {
         "Age": 23.17,
@@ -144,6 +151,7 @@ UI_EXAMPLES = [
         "Body Part": "Shoulders",
         "Equipment Needed": "None or Dumbbells",
         "Workout_Frequency (days/week)": 4.96,
+        "Water_Intake (liters)": 2.9,
     },
     {
         "Age": 55.92,
@@ -160,9 +168,9 @@ UI_EXAMPLES = [
         "Body Part": "Back",
         "Equipment Needed": "Pull-up Bar",
         "Workout_Frequency (days/week)": 3.97,
+        "Water_Intake (liters)": 2.1,
     },
 ]
-
 
 # Base de validation (relative au repo src/)
 DB_RELATIVE = ("data", "processed", "life_style_data", "life_style_data_val.db")
