@@ -165,6 +165,8 @@ def render_ml_tab(
                 payload["Resting_BPM"] = float(payload["Resting_BPM"])
             if "Water_Intake (liters)" in payload:          # 🔹 v2.12
                 payload["Water_Intake (liters)"] = float(payload["Water_Intake (liters)"])
+            if "Fat_Percentage" in payload:          # 🔹 v2.13
+                payload["Fat_Percentage"] = float(payload["Fat_Percentage"])
 
 
             return predict_single(

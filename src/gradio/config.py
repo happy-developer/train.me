@@ -28,9 +28,9 @@ UI_DEFAULTS = {
     "Workout_Frequency (days/week)": 5.0,
     "Body Part": "Abs",
     "Equipment Needed": "Wall",
-    "Water_Intake (liters)": 3.23 # 🆕 nouvelle feature catégorielle
+    "Water_Intake (liters)": 3.23,
+    "Fat_Percentage": 34,
 }
-
 
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
@@ -50,6 +50,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Cable Machine",
         "Workout_Frequency (days/week)": 3.99,
         "Water_Intake (liters)": 2.5,
+        "Fat_Percentage": 18.0,
     },
     {
         "Age": 23.37,
@@ -67,6 +68,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 4.0,
         "Water_Intake (liters)": 2.2,
+        "Fat_Percentage": 22.5,
     },
     {
         "Age": 33.22,
@@ -84,6 +86,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 2.99,
         "Water_Intake (liters)": 1.8,
+        "Fat_Percentage": 24.0,
     },
     {
         "Age": 38.69,
@@ -101,6 +104,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Parallel Bars or Chair",
         "Workout_Frequency (days/week)": 3.99,
         "Water_Intake (liters)": 2.7,
+        "Fat_Percentage": 27.0,
     },
     {
         "Age": 45.09,
@@ -118,6 +122,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Wall",
         "Workout_Frequency (days/week)": 4.0,
         "Water_Intake (liters)": 2.3,
+        "Fat_Percentage": 20.0,
     },
     {
         "Age": 53.19,
@@ -135,6 +140,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "Resistance Band or Cable Machine",
         "Workout_Frequency (days/week)": 3.02,
         "Water_Intake (liters)": 1.6,
+        "Fat_Percentage": 30.0,
     },
     {
         "Age": 23.17,
@@ -152,6 +158,7 @@ UI_EXAMPLES = [
         "Equipment Needed": "None or Dumbbells",
         "Workout_Frequency (days/week)": 4.96,
         "Water_Intake (liters)": 2.9,
+        "Fat_Percentage": 15.0,
     },
     {
         "Age": 55.92,
@@ -169,8 +176,10 @@ UI_EXAMPLES = [
         "Equipment Needed": "Pull-up Bar",
         "Workout_Frequency (days/week)": 3.97,
         "Water_Intake (liters)": 2.1,
+        "Fat_Percentage": 25.0,
     },
 ]
+
 
 # Base de validation (relative au repo src/)
 DB_RELATIVE = ("data", "processed", "life_style_data", "life_style_data_val.db")

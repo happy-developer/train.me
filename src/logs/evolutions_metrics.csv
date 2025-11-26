@@ -105,3 +105,11 @@ preprocessing_life_style_data_v2.13.pdf,,,,,,
 ,1,Random,Forest,0.001271,0.003042,0.999991
 ,2,Gradient,Boosting,0.011717,0.015531,0.999756
 ,3,Régression,Linéaire,1.123412,1.414982,-1.023341
+,,,,,,
+preprocessing_life_style_data_v2.14.pdf,,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)"", ""Max_BPM"", ""Avg_BPM"", ""Resting_BPM"", ""Difficulty Level"", ""Body Part"", ""Equipment Needed"", ""Water_Intake (liters)"", ""Fat_Percentage""",,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Bagging,Regressor,0.001288,0.003051,0.999991
+,1,Random,Forest,0.001286,0.003055,0.999991
+,2,Gradient,Boosting,0.011718,0.015531,0.999756
+,3,Régression,Linéaire,1.123433,1.415000,-1.023395
