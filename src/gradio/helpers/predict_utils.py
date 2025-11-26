@@ -49,6 +49,16 @@ def ui_to_internal_row(
         lvl_str = ui_dict["Difficulty Level"]
         row["Difficulty Level"] = float(DIFF_LVL_MAP[lvl_str])
 
+    # === E) EQUIPMENT NEEDED (One-Hot) ===============================
+    if any(col.startswith("Equipment Needed_") for col in expected_cols):
+        equip_str = ui_dict["Equipment Needed"]
+
+        for col in expected_cols:
+            if col.startswith("Equipment Needed_"):
+                suffix = col.replace("Equipment Needed_", "")
+                row[col] = 1.0 if suffix == equip_str else 0.0
+
+
     # === E) COPIE DIRECTE DES AUTRES COLONNES ===================
     for col in expected_cols:
         if col in row:

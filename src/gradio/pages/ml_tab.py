@@ -73,6 +73,16 @@ def render_ml_tab(
                             label="Body Part",
                         )
 
+                    elif name == "Equipment Needed":
+                        comp = gr.Dropdown(
+                            choices=["Step or Box", "Parallel Bars or Chair", "Bench or Sturdy Surface", "None or Dumbbells", "Resistance Band", 
+                                     "Wall", "None or Dumbbell", "Dumbbells", "Dumbbells or Barbell", "Low Bar or TRX", "Cable Machine",
+                                     "Box or Platform", "Bench or Chair", "Resistance Band or Cable Machine", "Kettlebell", "Bench or Step"
+                                     "Pull-up Bar", "Barbell", "Bench, Barbell", "Cable Machine or Resistance Band", "Pull-up Bar"],
+                            value="Step or Box",
+                            label="Equipment Needed",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(

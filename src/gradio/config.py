@@ -26,7 +26,8 @@ UI_DEFAULTS = {
     "Workout_Type": "Cardio",
     "Difficulty Level": "Intermediate",
     "Workout_Frequency (days/week)": 5.0,
-    "Body Part": "Abs",   # 🔹 nouveau
+    "Body Part": "Abs",
+    "Equipment Needed": "Wall"      # 🔹 nouveau
 }
 
 
@@ -45,13 +46,14 @@ UI_EXAMPLES = [
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
         "Body Part": "Legs",
+        "Equipment Needed": "Cable Machine",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
         "Age": 23.37,
         "Gender": "Female",
         "Weight (kg)": 56.41,
-        "Height (m)": 1.55,   # attention au min slider (si pb → mettre 1.58)
+        "Height (m)": 1.55,
         "Max_BPM": 179.43,
         "Avg_BPM": 131.75,
         "Resting_BPM": 73.18,
@@ -60,6 +62,7 @@ UI_EXAMPLES = [
         "Workout_Type": "HIIT",
         "Difficulty Level": "Intermediate",
         "Body Part": "Chest",
+        "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -75,6 +78,7 @@ UI_EXAMPLES = [
         "Workout_Type": "Cardio",
         "Difficulty Level": "Intermediate",
         "Body Part": "Arms",
+        "Equipment Needed": "Step or Box",
         "Workout_Frequency (days/week)": 2.99,
     },
     {
@@ -90,6 +94,7 @@ UI_EXAMPLES = [
         "Workout_Type": "HIIT",
         "Difficulty Level": "Advanced",
         "Body Part": "Shoulders",
+        "Equipment Needed": "Parallel Bars or Chair",
         "Workout_Frequency (days/week)": 3.99,
     },
     {
@@ -105,6 +110,7 @@ UI_EXAMPLES = [
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
         "Body Part": "Abs",
+        "Equipment Needed": "Wall",
         "Workout_Frequency (days/week)": 4.0,
     },
     {
@@ -120,6 +126,7 @@ UI_EXAMPLES = [
         "Workout_Type": "Yoga",
         "Difficulty Level": "Beginner",
         "Body Part": "Arms",
+        "Equipment Needed": "Resistance Band or Cable Machine",
         "Workout_Frequency (days/week)": 3.02,
     },
     {
@@ -135,6 +142,7 @@ UI_EXAMPLES = [
         "Workout_Type": "Strength",
         "Difficulty Level": "Advanced",
         "Body Part": "Shoulders",
+        "Equipment Needed": "None or Dumbbells",
         "Workout_Frequency (days/week)": 4.96,
     },
     {
@@ -150,11 +158,10 @@ UI_EXAMPLES = [
         "Workout_Type": "Yoga",
         "Difficulty Level": "Intermediate",
         "Body Part": "Back",
+        "Equipment Needed": "Pull-up Bar",
         "Workout_Frequency (days/week)": 3.97,
     },
 ]
-
-
 
 
 # Base de validation (relative au repo src/)

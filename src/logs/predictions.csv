@@ -161,3 +161,8 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-25T19:25:11.952580+00:00,40.0,Male,70.0,1.68,199.12,120.5,60.0,1.0,1.98,Cardio,Beginner,Abs,5.0,958.49,0,model.joblib,v2.11-minimal
 2025-11-25T19:29:43.183914+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,3.99,1080.84,0,model.joblib,v2.11-minimal
 2025-11-25T19:29:49.981372+00:00,23.37,Female,56.41,1.55,179.43,131.75,73.18,1.37,2.01,HIIT,Intermediate,Chest,4.0,1809.92,0,model.joblib,v2.11-minimal
+2025-11-26T10:42:19.581201+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,1080.94,0,model.joblib,v2.12-minimal
+2025-11-26T10:42:28.693090+00:00,23.37,Female,56.41,1.55,179.43,131.75,73.18,1.37,2.01,HIIT,Intermediate,Chest,Step or Box,4.0,1809.92,0,model.joblib,v2.12-minimal
+2025-11-26T10:42:46.560908+00:00,33.22,Female,58.98,1.67,175.04,123.95,54.96,0.91,1.02,Cardio,Intermediate,Arms,Step or Box,2.99,801.52,0,model.joblib,v2.12-minimal
+2025-11-26T10:43:05.213541+00:00,38.69,Female,93.78,1.7,191.21,155.1,50.07,1.1,1.99,HIIT,Advanced,Shoulders,Parallel Bars or Chair,3.99,1450.71,0,model.joblib,v2.12-minimal
+2025-11-26T10:47:45.256857+00:00,40.0,Male,70.0,1.68,199.12,120.5,60.0,1.0,1.98,Cardio,Beginner,Abs,Pull-up Bar,5.0,958.49,0,model.joblib,v2.12-minimal
