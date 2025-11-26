@@ -83,6 +83,13 @@ def render_ml_tab(
                             label="Equipment Needed",
                         )
 
+                    elif name == "diet_type":
+                        comp = gr.Dropdown(
+                            choices=["Paleo", "Low-Carb", "Vegetarian", "Keto", "Vegan", "Balanced"],
+                            value="Paleo",
+                            label="diet_type",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(

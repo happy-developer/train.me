@@ -169,3 +169,5 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-26T11:19:32.502859+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,2.5,1080.93,0,model.joblib,v2.13-minimal
 2025-11-26T11:19:42.960930+00:00,55.92,Female,84.07,1.63,183.87,141.12,51.79,1.01,2.01,Yoga,Intermediate,Back,Pull-up Bar,3.97,2.1,727.95,0,model.joblib,v2.13-minimal
 2025-11-26T11:56:28.083104+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,2.5,18.0,1080.97,0,model.joblib,v2.14-minimal
+2025-11-26T18:15:10.463757+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,2.5,18.0,Balanced,1080.95,0,model.joblib,v2.15-minimal
+2025-11-26T18:16:51.556254+00:00,23.37,Female,56.41,1.55,179.43,131.75,73.18,1.37,2.01,HIIT,Intermediate,Chest,Step or Box,4.0,2.2,22.5,Keto,1809.92,0,model.joblib,v2.15-minimal

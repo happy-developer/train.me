@@ -15,22 +15,23 @@ GENDER_ENCODER_FILENAME = "gender_encoder.joblib"
 # Valeurs par défaut UI (non normalisées)
 UI_DEFAULTS = {
     "Age": 40,
-    "Gender": "Female",
     "Weight (kg)": 70.0,
     "Height (m)": 1.68,
-    "Max_BPM": 199.12,
-    "Avg_BPM": 120.5,
-    "Resting_BPM": 60.0,
+    "Max_BPM": 188.58,
+    "Avg_BPM": 157.65,
+    "Resting_BPM": 69.05,
     "Session_Duration (hours)": 1.0,
-    "Experience_Level": 1.98,
-    "Workout_Type": "Cardio",
-    "Difficulty Level": "Intermediate",
-    "Workout_Frequency (days/week)": 5.0,
-    "Body Part": "Abs",
-    "Equipment Needed": "Wall",
-    "Water_Intake (liters)": 3.23,
-    "Fat_Percentage": 34,
+    "Experience_Level": 2.01,
+    "Workout_Type": "Strength",
+    "Difficulty Level": "Advanced",
+    "Body Part": "Legs",
+    "Equipment Needed": "Cable Machine",
+    "Workout_Frequency (days/week)": 3.99,
+    "Water_Intake (liters)": 2.0,
+    "Fat_Percentage": 22.0,
+    "diet_type": "Balanced",          # ✅ nouveau
 }
+
 
 # Exemples UI (affichés sous les sliders)
 UI_EXAMPLES = [
@@ -51,6 +52,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 3.99,
         "Water_Intake (liters)": 2.5,
         "Fat_Percentage": 18.0,
+        "diet_type": "Balanced",
     },
     {
         "Age": 23.37,
@@ -69,6 +71,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 4.0,
         "Water_Intake (liters)": 2.2,
         "Fat_Percentage": 22.5,
+        "diet_type": "Keto",
     },
     {
         "Age": 33.22,
@@ -87,6 +90,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 2.99,
         "Water_Intake (liters)": 1.8,
         "Fat_Percentage": 24.0,
+        "diet_type": "Low-Carb",
     },
     {
         "Age": 38.69,
@@ -105,6 +109,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 3.99,
         "Water_Intake (liters)": 2.7,
         "Fat_Percentage": 27.0,
+        "diet_type": "Paleo",
     },
     {
         "Age": 45.09,
@@ -123,6 +128,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 4.0,
         "Water_Intake (liters)": 2.3,
         "Fat_Percentage": 20.0,
+        "diet_type": "Vegan",
     },
     {
         "Age": 53.19,
@@ -141,6 +147,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 3.02,
         "Water_Intake (liters)": 1.6,
         "Fat_Percentage": 30.0,
+        "diet_type": "Vegetarian",
     },
     {
         "Age": 23.17,
@@ -159,6 +166,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 4.96,
         "Water_Intake (liters)": 2.9,
         "Fat_Percentage": 15.0,
+        "diet_type": "Balanced",
     },
     {
         "Age": 55.92,
@@ -177,6 +185,7 @@ UI_EXAMPLES = [
         "Workout_Frequency (days/week)": 3.97,
         "Water_Intake (liters)": 2.1,
         "Fat_Percentage": 25.0,
+        "diet_type": "Vegan",
     },
 ]
 
