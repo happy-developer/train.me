@@ -90,6 +90,13 @@ def render_ml_tab(
                             label="diet_type",
                         )
 
+                    elif name == "meal_type":
+                        comp = gr.Dropdown(
+                            choices=["Breakfast", "Lunch", "Dinner", "Snack"],
+                            value="Breakfast",
+                            label="meal_type",
+                        )
+
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(
