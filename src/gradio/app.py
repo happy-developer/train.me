@@ -44,9 +44,11 @@ from .helpers.sqlite_utils import load_val_subset
 def build_app():
     app_title = f"TrAIn.me — {schema.get('model_name','model')} ({schema.get('model_version','v?')})"
     app_desc_ml = f"Prédiction de `{TARGET_NAME}`"
+    app_desc_ex = "Exercices proposés"
     app_desc_dl = "Génération d'un programme sportif sur demande."
 
     from .pages.ml_tab import render_ml_tab
+    from .pages.exercices_tab import render_list_of_exercices
     from .pages.dl_tab import render_dl_tab
     from .config import UI_EXAMPLES
 
@@ -71,6 +73,7 @@ def build_app():
                 report_path=REPORT_PATH,
                 on_load=demo.load,
             )
+            render_list_of_exercices(app_desc_ex=app_desc_ex)
             render_dl_tab(app_desc_dl=app_desc_dl)
 
     return demo
