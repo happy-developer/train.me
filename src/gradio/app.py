@@ -1,6 +1,7 @@
 from pathlib import Path
 import gradio as gr
 import pandas as pd
+import os
 
 
 # ---------- Paths ----------
@@ -73,6 +74,10 @@ def build_app():
             render_dl_tab(app_desc_dl=app_desc_dl)
 
     return demo
+
+
+if __name__ == "__main__":
+    build_app().launch(server_name="0.0.0.0", server_port=int(os.getenv("PORT", 7860)))
 
 
 
