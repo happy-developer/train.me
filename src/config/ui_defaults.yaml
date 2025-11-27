@@ -1,0 +1,22 @@
+# Valeurs par défaut pour l'UI (Gradio)
+# Ces valeurs sont utilisées pour pré-remplir les champs de l'interface.
+
+UI_DEFAULTS:
+  Age: 55.92
+  Gender: "Female"
+  Weight (kg): 84.07
+  Height (m): 1.63
+  Max_BPM: 183.87
+  Avg_BPM: 141.12
+  Resting_BPM: 51.79
+  Session_Duration (hours): 1.01
+  Experience_Level: 2.01
+  Workout_Type: "Yoga"
+  Difficulty Level: "Intermediate"
+  Body Part: "Back"
+  Equipment Needed: "Pull-up Bar"
+  Workout_Frequency (days/week): 3.97
+  Water_Intake (liters): 2.88
+  Fat_Percentage: 32.08817620708069
+  diet_type: "Low-Carb"
+  meal_type: "Lunch"

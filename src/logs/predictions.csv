@@ -175,3 +175,9 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-26T19:07:14.711011+00:00,23.37,Female,56.41,1.55,179.43,131.75,73.18,1.37,2.01,HIIT,Intermediate,Chest,Step or Box,4.0,1.9,27.65502087929296,Vegetarian,Lunch,1809.92,0,model.joblib,v2.16-minimal
 2025-11-26T19:07:35.900130+00:00,33.2,Female,58.98,1.67,175.04,123.95,54.96,0.91,1.02,Cardio,Intermediate,Arms,Step or Box,2.99,1.88,24.320821254687548,Paleo,Lunch,801.46,0,model.joblib,v2.16-minimal
 2025-11-26T19:07:50.275024+00:00,38.69,Female,93.78,1.7,191.21,155.1,50.07,1.1,1.99,HIIT,Advanced,Shoulders,Parallel Bars or Chair,3.99,2.5,32.81357179645506,Paleo,Lunch,1450.69,0,model.joblib,v2.16-minimal
+2025-11-27T10:22:49.858866+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,1.5,26.800377179186803,Vegan,Lunch,1080.83,0,model.joblib,v3.1-minimal
+2025-11-27T10:30:33.392350+00:00,55.0,Male,84.07,1.63,183.87,141.12,51.79,1.01,2.01,Cardio,Beginner,Abs,Step or Box,3.97,2.88,32.08817620708069,Paleo,Breakfast,970.35,0,model.joblib,v3.1-minimal
+2025-11-27T10:30:45.277193+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,1.5,26.800377179186803,Vegan,Lunch,1080.83,0,model.joblib,v3.1-minimal
+2025-11-27T10:34:26.105245+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,1.5,26.800377179186803,Vegan,Lunch,1080.83,0,model.joblib,v3.1-minimal
+2025-11-27T10:43:01.850193+00:00,34.91,Male,65.27,1.62,188.58,157.65,69.05,1.0,2.01,Strength,Advanced,Legs,Cable Machine,3.99,1.5,26.800377179186803,Vegan,Lunch,1080.83,0,model.joblib,v3.1-minimal
+2025-11-27T10:43:12.218774+00:00,23.37,Female,56.41,1.55,179.43,131.75,73.18,1.37,2.01,HIIT,Intermediate,Chest,Step or Box,4.0,1.9,27.65502087929296,Vegetarian,Lunch,1809.92,0,model.joblib,v3.1-minimal

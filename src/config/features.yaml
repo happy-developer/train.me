@@ -1,0 +1,67 @@
+# Features réellement utilisées dans ton pipeline ML
+selected_features_full_columns:
+  # Target
+  - Calories_Burned
+
+  # Core features
+  - Age
+  - Gender
+  - Weight (kg)
+  - Height (m)
+  - Max_BPM
+  - Avg_BPM
+  - Resting_BPM
+  - Session_Duration (hours)
+  - Experience_Level
+  - Workout_Type
+  - Difficulty Level
+  - Body Part
+  - Equipment Needed
+  - Workout_Frequency (days/week)
+  - Water_Intake (liters)
+  - Fat_Percentage
+  - diet_type
+  - meal_type
+
+selected_features_test:
+  # Target
+  - Calories_Burned
+
+  # Core features
+  - Age
+  - Gender
+  - Weight (kg)
+  - Height (m)
+  - Max_BPM
+  - Avg_BPM
+  - Resting_BPM
+  - Session_Duration (hours)
+  - Experience_Level
+  - Workout_Type
+  - Difficulty Level
+  - Body Part
+  - Equipment Needed
+  - Workout_Frequency (days/week)
+  - Water_Intake (liters)
+  - Fat_Percentage
+  - diet_type
+  - meal_type
+
+# Colonnes optionnelles présentes dans certains datasets
+#    Gardées ici pour un usage futur (Transfer Learning / Data Augmentation)
+optional_features:
+  - BMI
+  - sugar_g
+  - sodium_mg
+  - cholesterol_mg
+  - serving_size_g
+  - Name of Exercise
+  - Sets
+  - Reps
+  - Target Muscle Group
+  - Type of Muscle
+  - Benefit
+  - rating
+  - cooking_method
+  - prep_time_min
+  - cook_time_min
