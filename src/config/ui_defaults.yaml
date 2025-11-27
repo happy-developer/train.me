@@ -12,11 +12,6 @@ UI_DEFAULTS:
   Session_Duration (hours): 1.01
   Experience_Level: 2.01
   Workout_Type: "Yoga"
-  Difficulty Level: "Intermediate"
-  Body Part: "Back"
-  Equipment Needed: "Pull-up Bar"
+  # Body Part: "Back"
   Workout_Frequency (days/week): 3.97
-  Water_Intake (liters): 2.88
-  Fat_Percentage: 32.08817620708069
-  diet_type: "Low-Carb"
-  meal_type: "Lunch"
+  # Fat_Percentage: 32.08817620708069

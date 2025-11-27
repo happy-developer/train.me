@@ -61,11 +61,6 @@ inference_full_columns:
     min: 1.94
     max: 5.06
 
-  Water_Intake (liters):
-    type: number
-    min: 1.4
-    max: 3.8
-
   Difficulty Level:
     type: integer
     enum: [0, 1, 2]
@@ -136,10 +131,10 @@ inference_test:
     min: 1.50
     max: 2.30
 
-  Fat_Percentage:
-    type: number
-    min: 11.0
-    max: 35.0
+  # Fat_Percentage:
+  #   type: number
+  #   min: 11.0
+  #   max: 35.0
 
   Max_BPM:
     type: number
@@ -175,55 +170,13 @@ inference_test:
     min: 1.94
     max: 5.06
 
-  Water_Intake (liters):
-    type: number
-    min: 1.4
-    max: 3.8
-
-  Difficulty Level:
-    type: integer
-    enum: [0, 1, 2]
-    min: 0
-    max: 2
-
-  Body Part:
-    type: string
-    enum:
-      - Abs
-      - Arms
-      - Back
-      - Chest
-      - Forearms
-      - Legs
-      - Shoulders
-
-  Equipment Needed:
-    type: string
-    enum:
-      - Step or Box
-      - Parallel Bars or Chair
-      - Bench or Sturdy Surface
-      - None or Dumbbells
-      - Resistance Band
-      - Wall
-      - None or Dumbbell
-      - Dumbbells
-      - Dumbbells or Barbell
-      - Low Bar or TRX
-      - Cable Machine
-      - Box or Platform
-      - Bench or Chair
-      - Resistance Band or Cable Machine
-      - Kettlebell
-      - Bench or Step
-      - Pull-up Bar
-      - Barbell
-      - Cable Machine or Resistance Band
-
-  diet_type:
-    type: string
-    enum: ["Paleo", "Low-Carb", "Vegetarian", "Keto", "Vegan", "Balanced"]
-
-  meal_type:
-    type: string
-    enum: ["Breakfast", "Lunch", "Dinner", "Snack"]
+  # Body Part:
+  #   type: string
+  #   enum:
+  #     - Abs
+  #     - Arms
+  #     - Back
+  #     - Chest
+  #     - Forearms
+  #     - Legs
+  #     - Shoulders

@@ -1,6 +1,5 @@
-# 🌟 Exemples UI affichés sous les sliders / inputs
+# Exemples UI affichés sous les sliders / inputs
 # Chaque entrée représente un exemple complet d'utilisateur typique.
-
 UI_EXAMPLES:
 
   - Age: 34.91
@@ -13,14 +12,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.0
     Experience_Level: 2.01
     Workout_Type: "Strength"
-    Difficulty Level: "Advanced"
-    Body Part: "Legs"
-    Equipment Needed: "Cable Machine"
+    # Body Part: "Legs"
     Workout_Frequency (days/week): 3.99
-    Water_Intake (liters): 1.5
-    Fat_Percentage: 26.800377179186803
-    diet_type: "Vegan"
-    meal_type: "Lunch"
+    # Fat_Percentage: 26.800377179186803
 
   - Age: 23.37
     Gender: "Female"
@@ -32,14 +26,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.37
     Experience_Level: 2.01
     Workout_Type: "HIIT"
-    Difficulty Level: "Intermediate"
-    Body Part: "Chest"
-    Equipment Needed: "Step or Box"
+    # Body Part: "Chest"
     Workout_Frequency (days/week): 4.0
-    Water_Intake (liters): 1.9
-    Fat_Percentage: 27.65502087929296
-    diet_type: "Vegetarian"
-    meal_type: "Lunch"
+    # Fat_Percentage: 27.65502087929296
 
   - Age: 33.2
     Gender: "Female"
@@ -51,14 +40,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 0.91
     Experience_Level: 1.02
     Workout_Type: "Cardio"
-    Difficulty Level: "Intermediate"
-    Body Part: "Arms"
-    Equipment Needed: "Step or Box"
+    # Body Part: "Arms"
     Workout_Frequency (days/week): 2.99
-    Water_Intake (liters): 1.88
-    Fat_Percentage: 24.320821254687547
-    diet_type: "Paleo"
-    meal_type: "Lunch"
+    # Fat_Percentage: 24.320821254687547
 
   - Age: 38.69
     Gender: "Female"
@@ -70,14 +54,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.1
     Experience_Level: 1.99
     Workout_Type: "HIIT"
-    Difficulty Level: "Advanced"
-    Body Part: "Shoulders"
-    Equipment Needed: "Parallel Bars or Chair"
+    # Body Part: "Shoulders"
     Workout_Frequency (days/week): 3.99
-    Water_Intake (liters): 2.5
-    Fat_Percentage: 32.81357179645506
-    diet_type: "Paleo"
-    meal_type: "Lunch"
+    # Fat_Percentage: 32.81357179645506
 
   - Age: 45.09
     Gender: "Male"
@@ -89,14 +68,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.08
     Experience_Level: 2.0
     Workout_Type: "Strength"
-    Difficulty Level: "Advanced"
-    Body Part: "Abs"
-    Equipment Needed: "Wall"
+    # Body Part: "Abs"
     Workout_Frequency (days/week): 4.0
-    Water_Intake (liters): 2.91
-    Fat_Percentage: 17.30731864063283
-    diet_type: "Vegan"
-    meal_type: "Lunch"
+    # Fat_Percentage: 17.30731864063283
 
   - Age: 53.19
     Gender: "Female"
@@ -108,14 +82,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 0.69
     Experience_Level: 1.0
     Workout_Type: "Yoga"
-    Difficulty Level: "Beginner"
-    Body Part: "Arms"
-    Equipment Needed: "Resistance Band or Cable Machine"
+    # Body Part: "Arms"
     Workout_Frequency (days/week): 3.02
-    Water_Intake (liters): 2.91
-    Fat_Percentage: 32.04906411038813
-    diet_type: "Keto"
-    meal_type: "Lunch"
+    # Fat_Percentage: 32.04906411038813
 
   - Age: 23.17
     Gender: "Male"
@@ -127,14 +96,9 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.67
     Experience_Level: 3.0
     Workout_Type: "Strength"
-    Difficulty Level: "Advanced"
-    Body Part: "Shoulders"
-    Equipment Needed: "None or Dumbbells"
+    # Body Part: "Shoulders"
     Workout_Frequency (days/week): 4.96
-    Water_Intake (liters): 2.71
-    Fat_Percentage: 20.546292182588086
-    diet_type: "Low-Carb"
-    meal_type: "Lunch"
+    # Fat_Percentage: 20.546292182588086
 
   - Age: 55.92
     Gender: "Female"
@@ -146,11 +110,6 @@ UI_EXAMPLES:
     Session_Duration (hours): 1.01
     Experience_Level: 2.01
     Workout_Type: "Yoga"
-    Difficulty Level: "Intermediate"
-    Body Part: "Back"
-    Equipment Needed: "Pull-up Bar"
+    # Body Part: "Back"
     Workout_Frequency (days/week): 3.97
-    Water_Intake (liters): 2.88
-    Fat_Percentage: 32.08817620708069
-    diet_type: "Low-Carb"
-    meal_type: "Lunch"
+    # Fat_Percentage: 32.08817620708069

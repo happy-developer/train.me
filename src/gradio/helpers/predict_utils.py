@@ -33,30 +33,14 @@ def ui_to_internal_row(
         if col in expected_cols:
             row[col] = 1.0 if selected_wt == wt else 0.0
 
-    # === C) BODY_PART_* (One-Hot) ===============================
-    body_parts = ["Abs", "Arms", "Back", "Chest", "Forearms", "Legs", "Shoulders"]
-    selected_bp = ui_dict["Body Part"]
+    # # === C) BODY_PART_* (One-Hot) ===============================
+    # body_parts = ["Abs", "Arms", "Back", "Chest", "Forearms", "Legs", "Shoulders"]
+    # selected_bp = ui_dict["Body Part"]
 
-    for bp in body_parts:
-        col = f"Body Part_{bp}"
-        if col in expected_cols:
-            row[col] = 1.0 if selected_bp == bp else 0.0
-
-    # === D) DIFFICULTY LEVEL (Ordinal) ==========================
-    DIFF_LVL_MAP = {"Beginner": 0, "Intermediate": 1, "Advanced": 2}
-
-    if "Difficulty Level" in expected_cols:
-        lvl_str = ui_dict["Difficulty Level"]
-        row["Difficulty Level"] = float(DIFF_LVL_MAP[lvl_str])
-
-    # === E) EQUIPMENT NEEDED (One-Hot) ===============================
-    if any(col.startswith("Equipment Needed_") for col in expected_cols):
-        equip_str = ui_dict["Equipment Needed"]
-
-        for col in expected_cols:
-            if col.startswith("Equipment Needed_"):
-                suffix = col.replace("Equipment Needed_", "")
-                row[col] = 1.0 if suffix == equip_str else 0.0
+    # for bp in body_parts:
+    #     col = f"Body Part_{bp}"
+    #     if col in expected_cols:
+    #         row[col] = 1.0 if selected_bp == bp else 0.0
 
 
     # === E) COPIE DIRECTE DES AUTRES COLONNES ===================

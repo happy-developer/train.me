@@ -137,3 +137,11 @@ V3.0 (best models + best params),,,,,,
 ,1,Random,Forest,0.001294,0.003055,0.999991
 ,2,Gradient,Boosting,0.011718,0.015532,0.999756
 ,3,Régression,Linéaire,1.123380,1.414898,-1.023103
+,,,,,,
+V3.1 (suppression vague 1),,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)"", ""Max_BPM"", ""Avg_BPM"", ""Resting_BPM"", ""Workout_Type""",,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.001220,0.002947,0.999991
+,1,Bagging,Regressor,0.001221,0.002965,0.999991
+,2,Gradient,Boosting,0.011573,0.015298,0.999763
+,3,Régression,Linéaire,1.123586,1.414872,-1.023029

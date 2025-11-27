@@ -68,10 +68,8 @@ features_processed_test:
   - Height (m)
   - Gender_1.0
   - Experience_Level
-  - Difficulty Level
   - Workout_Frequency (days/week)
-  - Water_Intake (liters)
-  - Fat_Percentage
+  # - Fat_Percentage
   - Session_Duration (hours)
   - Max_BPM
   - Avg_BPM
@@ -82,42 +80,10 @@ features_processed_test:
   - Workout_Type_Strength
   - Workout_Type_Yoga
 
-  # One-hot Body Part
-  - Body Part_Arms
-  - Body Part_Back
-  - Body Part_Chest
-  - Body Part_Forearms
-  - Body Part_Legs
-  - Body Part_Shoulders
-
-  # One-hot Equipment Needed
-  - Equipment Needed_Bench or Step
-  - Equipment Needed_Bench or Sturdy Surface
-  - Equipment Needed_Bench, Barbell
-  - Equipment Needed_Box or Platform
-  - Equipment Needed_Cable Machine
-  - Equipment Needed_Cable Machine or Resistance Band
-  - Equipment Needed_Dumbbells
-  - Equipment Needed_Dumbbells or Barbell
-  - Equipment Needed_Kettlebell
-  - Equipment Needed_Low Bar or TRX
-  - Equipment Needed_None or Dumbbell
-  - Equipment Needed_None or Dumbbells
-  - Equipment Needed_Parallel Bars or Chair
-  - Equipment Needed_Pull-up Bar
-  - Equipment Needed_Resistance Band
-  - Equipment Needed_Resistance Band or Cable Machine
-  - Equipment Needed_Step or Box
-  - Equipment Needed_Wall
-
-  # One-hot diet_type
-  - diet_type_Paleo
-  - diet_type_Low-Carb
-  - diet_type_Vegetarian
-  - diet_type_Keto
-  - diet_type_Vegan
-
-  # One-hot meal_type
-  - meal_type_Lunch
-  - meal_type_Dinner
-  - meal_type_Snack
+  # # One-hot Body Part
+  # - Body Part_Arms
+  # - Body Part_Back
+  # - Body Part_Chest
+  # - Body Part_Forearms
+  # - Body Part_Legs
+  # - Body Part_Shoulders
