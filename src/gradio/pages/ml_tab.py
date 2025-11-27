@@ -78,7 +78,14 @@ def render_ml_tab(
             with gr.Column():
                 gr.Markdown("### Prédiction")
                 y_out = gr.Number(label=target_name, interactive=False, precision=2)
-                meta_out = gr.Textbox(label="Infos", interactive=False)
+
+                meta_out = gr.Textbox(
+                    label="Infos",
+                    interactive=False,
+                    lines=4,        # hauteur minimale (ex: 4 lignes)
+                    max_lines=8,    # hauteur max avant scroll
+                )
+
 
         # ====== Exemples ======
         examples_dicts = ui_examples or [schema.get("example_payload", {})]

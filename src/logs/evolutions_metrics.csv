@@ -161,3 +161,11 @@ V3.3 (suppression vague 3),,,,,,
 ,1,Bagging,Regressor,0.148680,0.243490,0.940086
 ,2,Gradient,Boosting,0.379663,0.480329,0.766845
 ,3,Régression,Linéaire,1.023405,1.282605,-0.662469
+,,,,,,
+V3.4 (changement y),,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Workout_Frequency (days/week)"", ""Height (m)"", ""Workout_Type""",,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.148544,0.243314,0.940173
+,1,Bagging,Regressor,0.148680,0.243490,0.940086
+,2,Gradient,Boosting,0.379663,0.480329,0.766845
+,3,Régression,Linéaire,1.023405,1.282605,-0.662469

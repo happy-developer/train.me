@@ -25,7 +25,7 @@ selected_features_full_columns:
 
 selected_features_test:
   # Target
-  - Calories_Burned # --> à changer pour Experience_Level
+  - Experience_Level
 
   # Core features
   - Age
