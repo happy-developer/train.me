@@ -6,11 +6,6 @@ UI_EXAMPLES:
     Gender: "Male"
     Weight (kg): 65.27
     Height (m): 1.62
-    Max_BPM: 188.58
-    Avg_BPM: 157.65
-    Resting_BPM: 69.05
-    Session_Duration (hours): 1.0
-    Experience_Level: 2.01
     Workout_Type: "Strength"
     # Body Part: "Legs"
     Workout_Frequency (days/week): 3.99
@@ -20,11 +15,6 @@ UI_EXAMPLES:
     Gender: "Female"
     Weight (kg): 56.41
     Height (m): 1.55
-    Max_BPM: 179.43
-    Avg_BPM: 131.75
-    Resting_BPM: 73.18
-    Session_Duration (hours): 1.37
-    Experience_Level: 2.01
     Workout_Type: "HIIT"
     # Body Part: "Chest"
     Workout_Frequency (days/week): 4.0
@@ -34,11 +24,6 @@ UI_EXAMPLES:
     Gender: "Female"
     Weight (kg): 58.98
     Height (m): 1.67
-    Max_BPM: 175.04
-    Avg_BPM: 123.95
-    Resting_BPM: 54.96
-    Session_Duration (hours): 0.91
-    Experience_Level: 1.02
     Workout_Type: "Cardio"
     # Body Part: "Arms"
     Workout_Frequency (days/week): 2.99
@@ -48,11 +33,6 @@ UI_EXAMPLES:
     Gender: "Female"
     Weight (kg): 93.78
     Height (m): 1.7
-    Max_BPM: 191.21
-    Avg_BPM: 155.1
-    Resting_BPM: 50.07
-    Session_Duration (hours): 1.1
-    Experience_Level: 1.99
     Workout_Type: "HIIT"
     # Body Part: "Shoulders"
     Workout_Frequency (days/week): 3.99
@@ -62,11 +42,6 @@ UI_EXAMPLES:
     Gender: "Male"
     Weight (kg): 52.42
     Height (m): 1.88
-    Max_BPM: 193.58
-    Avg_BPM: 152.88
-    Resting_BPM: 70.84
-    Session_Duration (hours): 1.08
-    Experience_Level: 2.0
     Workout_Type: "Strength"
     # Body Part: "Abs"
     Workout_Frequency (days/week): 4.0
@@ -76,11 +51,6 @@ UI_EXAMPLES:
     Gender: "Female"
     Weight (kg): 105.05
     Height (m): 1.84
-    Max_BPM: 176.52
-    Avg_BPM: 130.6
-    Resting_BPM: 61.84
-    Session_Duration (hours): 0.69
-    Experience_Level: 1.0
     Workout_Type: "Yoga"
     # Body Part: "Arms"
     Workout_Frequency (days/week): 3.02
@@ -90,11 +60,6 @@ UI_EXAMPLES:
     Gender: "Male"
     Weight (kg): 58.41
     Height (m): 1.78
-    Max_BPM: 184.75
-    Avg_BPM: 140.9
-    Resting_BPM: 58.01
-    Session_Duration (hours): 1.67
-    Experience_Level: 3.0
     Workout_Type: "Strength"
     # Body Part: "Shoulders"
     Workout_Frequency (days/week): 4.96
@@ -104,11 +69,6 @@ UI_EXAMPLES:
     Gender: "Female"
     Weight (kg): 84.07
     Height (m): 1.63
-    Max_BPM: 183.87
-    Avg_BPM: 141.12
-    Resting_BPM: 51.79
-    Session_Duration (hours): 1.01
-    Experience_Level: 2.01
     Workout_Type: "Yoga"
     # Body Part: "Back"
     Workout_Frequency (days/week): 3.97

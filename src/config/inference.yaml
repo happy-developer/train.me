@@ -136,34 +136,9 @@ inference_test:
   #   min: 11.0
   #   max: 35.0
 
-  Max_BPM:
-    type: number
-    min: 159
-    max: 200
-
-  Avg_BPM:
-    type: number
-    min: 119
-    max: 170
-
-  Resting_BPM:
-    type: number
-    min: 49.0
-    max: 75.0
-
-  Session_Duration (hours):
-    type: number
-    min: 0.1
-    max: 6
-
   Workout_Type:
     type: string
     enum: ["Cardio", "Strength", "HIIT", "Yoga", "Pilates", "Other"]
-
-  Experience_Level:
-    type: number
-    min: 1.0
-    max: 3.05
 
   Workout_Frequency (days/week):
     type: number

@@ -145,3 +145,19 @@ V3.1 (suppression vague 1),,,,,,
 ,1,Bagging,Regressor,0.001221,0.002965,0.999991
 ,2,Gradient,Boosting,0.011573,0.015298,0.999763
 ,3,Régression,Linéaire,1.123586,1.414872,-1.023029
+,,,,,,
+V3.2 (suppression vague 2),,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Experience_Level"", ""Workout_Frequency (days/week)"", ""Session_Duration (hours)"", ""Height (m)"", ""Workout_Type""",,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.001107,0.002819,0.999992
+,1,Bagging,Regressor,0.001117,0.002830,0.999992
+,2,Gradient,Boosting,0.011608,0.015365,0.999761
+,3,Régression,Linéaire,1.123566,1.414834,-1.022920
+,,,,,,
+V3.3 (suppression vague 3),,,,,,
+"""Age"", ""Weight (kg)"", ""Gender"", ""Workout_Frequency (days/week)"", ""Height (m)"", ""Workout_Type""",,,,,,
+,Modèle,MAE,RMSE,R²,,
+,0,Random,Forest,0.148544,0.243314,0.940173
+,1,Bagging,Regressor,0.148680,0.243490,0.940086
+,2,Gradient,Boosting,0.379663,0.480329,0.766845
+,3,Régression,Linéaire,1.023405,1.282605,-0.662469

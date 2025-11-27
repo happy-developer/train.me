@@ -67,13 +67,8 @@ features_processed_test:
   - Weight (kg)
   - Height (m)
   - Gender_1.0
-  - Experience_Level
   - Workout_Frequency (days/week)
   # - Fat_Percentage
-  - Session_Duration (hours)
-  - Max_BPM
-  - Avg_BPM
-  - Resting_BPM
 
   # One-hot Workout_Type
   - Workout_Type_HIIT

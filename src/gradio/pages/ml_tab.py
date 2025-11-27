@@ -59,44 +59,6 @@ def render_ml_tab(
                             label="Workout_Type",
                         )
 
-                    elif name == "Difficulty Level":
-                        comp = gr.Dropdown(
-                            choices=["Beginner", "Intermediate", "Advanced"],   # ← fixe le problème
-                            value="Beginner",                                   # ou autre valeur par défaut
-                            label="Difficulty Level",
-                        )
-
-                    elif name == "Body Part":
-                        comp = gr.Dropdown(
-                            choices=["Abs", "Arms", "Back", "Chest", "Forearms", "Legs", "Shoulders"],
-                            value="Abs",
-                            label="Body Part",
-                        )
-
-                    elif name == "Equipment Needed":
-                        comp = gr.Dropdown(
-                            choices=["Step or Box", "Parallel Bars or Chair", "Bench or Sturdy Surface", "None or Dumbbells", "Resistance Band", 
-                                     "Wall", "None or Dumbbell", "Dumbbells", "Dumbbells or Barbell", "Low Bar or TRX", "Cable Machine",
-                                     "Box or Platform", "Bench or Chair", "Resistance Band or Cable Machine", "Kettlebell", "Bench or Step"
-                                     "Pull-up Bar", "Barbell", "Bench, Barbell", "Cable Machine or Resistance Band", "Pull-up Bar"],
-                            value="Step or Box",
-                            label="Equipment Needed",
-                        )
-
-                    elif name == "diet_type":
-                        comp = gr.Dropdown(
-                            choices=["Paleo", "Low-Carb", "Vegetarian", "Keto", "Vegan", "Balanced"],
-                            value="Paleo",
-                            label="diet_type",
-                        )
-
-                    elif name == "meal_type":
-                        comp = gr.Dropdown(
-                            choices=["Breakfast", "Lunch", "Dinner", "Snack"],
-                            value="Breakfast",
-                            label="meal_type",
-                        )
-
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
                         comp = gr.Slider(
@@ -165,23 +127,8 @@ def render_ml_tab(
                 payload["Weight (kg)"] = float(payload["Weight (kg)"])
             if "Height (m)" in payload:
                 payload["Height (m)"] = float(payload["Height (m)"])
-            if "Experience_Level" in payload:
-                payload["Experience_Level"] = float(payload["Experience_Level"])
             if "Workout_Frequency (days/week)" in payload:
                 payload["Workout_Frequency (days/week)"] = float(payload["Workout_Frequency (days/week)"])
-            if "Session_Duration (hours)" in payload:
-                payload["Session_Duration (hours)"] = float(payload["Session_Duration (hours)"])
-            if "Max_BPM" in payload:
-                payload["Max_BPM"] = float(payload["Max_BPM"])
-            if "Avg_BPM" in payload:              # ← nouveau en v2.7
-                payload["Avg_BPM"] = float(payload["Avg_BPM"])
-            if "Resting_BPM" in payload:          # ← v2.8 (nouvelle ligne)
-                payload["Resting_BPM"] = float(payload["Resting_BPM"])
-            if "Water_Intake (liters)" in payload:          # 🔹 v2.12
-                payload["Water_Intake (liters)"] = float(payload["Water_Intake (liters)"])
-            if "Fat_Percentage" in payload:          # 🔹 v2.13
-                payload["Fat_Percentage"] = float(payload["Fat_Percentage"])
-
 
             return predict_single(
                 payload=payload,

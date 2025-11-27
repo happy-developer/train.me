@@ -25,22 +25,18 @@ selected_features_full_columns:
 
 selected_features_test:
   # Target
-  - Calories_Burned
+  - Calories_Burned # --> à changer pour Experience_Level
 
   # Core features
   - Age
   - Gender
   - Weight (kg)
   - Height (m)
-  - Max_BPM
-  - Avg_BPM
-  - Resting_BPM
-  - Session_Duration (hours)
-  - Experience_Level
   - Workout_Type
   # - Body Part
   - Workout_Frequency (days/week)
   # - Fat_Percentage
+
 
 # Colonnes optionnelles présentes dans certains datasets
 #    Gardées ici pour un usage futur (Transfer Learning / Data Augmentation)

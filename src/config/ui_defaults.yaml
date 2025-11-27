@@ -6,11 +6,6 @@ UI_DEFAULTS:
   Gender: "Female"
   Weight (kg): 84.07
   Height (m): 1.63
-  Max_BPM: 183.87
-  Avg_BPM: 141.12
-  Resting_BPM: 51.79
-  Session_Duration (hours): 1.01
-  Experience_Level: 2.01
   Workout_Type: "Yoga"
   # Body Part: "Back"
   Workout_Frequency (days/week): 3.97
