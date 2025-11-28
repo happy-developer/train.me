@@ -43,9 +43,9 @@ from .helpers.sqlite_utils import load_val_subset
 # ---------- UI ----------
 def build_app():
     app_title = f"TrAIn.me — {schema.get('model_name','model')} ({schema.get('model_version','v?')})"
-    app_desc_ml = f"Prédiction de `{TARGET_NAME}`"
-    app_desc_ex = "Exercices proposés"
-    app_desc_dl = "Génération d'un programme sportif sur demande."
+    app_desc_ml = f"Personalize your experience"
+    app_desc_ex = "Choose your training program"
+    app_desc_dl = "Generate your personalized exercise"
 
     from .pages.ml_tab import render_ml_tab
     from .pages.exercices_tab import render_list_of_exercices

@@ -70,26 +70,25 @@ def render_list_of_exercices(
     if default_col is None:
         default_col = columns[0]
 
-    with gr.Tab("Liste des programmes"):
+    with gr.Tab("List of programs"):
         gr.Markdown(f"## {app_desc_ex}")
         gr.Markdown(
-            "Le tableau ci-dessous affiche un **aperçu** de chaque exercice.\n\n"
-            "- Clique sur les en-têtes pour trier\n"
-            "- Utilise la recherche pour filtrer\n"
-            "- La colonne *Execution (aperçu)* évite de prendre 100% de la largeur 😉"
+            "The table below shows an overview of each exercise.\n\n"
+            "- Click on the headers to sort\n"
+            "- Use the search bar to filter\n"
         )
 
         with gr.Row():
             search_box = gr.Textbox(
-                label="Recherche texte",
-                placeholder="Nom, muscle, matériel…",
+                label="Text search",
+                placeholder="Name, muscle, equipment…",
             )
             col_dropdown = gr.Dropdown(
-                label="Colonne",
+                label="Column",
                 choices=columns,
                 value=default_col,
             )
-            reset_btn = gr.Button("Réinitialiser")
+            reset_btn = gr.Button("Reset")
 
         table = gr.Dataframe(
             value=df_view,

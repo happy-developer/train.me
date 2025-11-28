@@ -37,7 +37,7 @@ def report_summary_df(rep: dict) -> pd.DataFrame:
         ("selected_model.type", sel.get("model_type", "-")),
         ("selected_model.class", sel.get("model_class", "-")),
     ]
-    return pd.DataFrame(rows, columns=["Info", "Valeur"])
+    return pd.DataFrame(rows, columns=["Informations", "Value"])
 
 
 def report_metrics_df(rep: dict) -> pd.DataFrame:
@@ -47,13 +47,13 @@ def report_metrics_df(rep: dict) -> pd.DataFrame:
     """
     mets = rep.get("metrics_by_model", {})
     if not mets:
-        return pd.DataFrame(columns=["Modèle", "MAE", "RMSE", "R2"])
+        return pd.DataFrame(columns=["Model", "MAE", "RMSE", "R2"])
 
-    df = pd.DataFrame(mets).T.reset_index().rename(columns={"index": "Modèle"})
+    df = pd.DataFrame(mets).T.reset_index().rename(columns={"index": "Model"})
 
     # Conversion et arrondis
     for c in ("MAE", "RMSE", "R2"):
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce").round(3)
 
-    return df[["Modèle", "MAE", "RMSE", "R2"]]
+    return df[["Model", "MAE", "RMSE", "R2"]]

@@ -233,3 +233,6 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-11-27T15:28:51.277660+00:00,45.09,Male,52.42,1.88,Strength,4.0,2.0,0,model.joblib,v3.2-minimal
 2025-11-27T15:29:01.390299+00:00,53.19,Female,105.05,1.84,Yoga,3.02,1.01,0,model.joblib,v3.2-minimal
 2025-11-27T15:32:06.865901+00:00,34.91,Male,65.27,1.62,Strength,3.99,2.01,0,model.joblib,v3.2-minimal
+2025-11-28T18:19:54.621208+00:00,34.91,Male,65.27,1.62,Strength,3.99,2.01,0,model.joblib,v4.0-minimal
+2025-11-28T18:20:03.722094+00:00,38.69,Female,93.78,1.7,Pilates,3.99,2.0,0,model.joblib,v4.0-minimal
+2025-11-28T18:44:59.521090+00:00,55.0,Male,84.07,1.63,Cardio,3.97,2.0,0,model.joblib,v4.0-minimal

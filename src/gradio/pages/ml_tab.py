@@ -35,7 +35,7 @@ def render_ml_tab(
         # ====== Ligne principale (inputs/pred) ======
         with gr.Row():
             with gr.Column():
-                gr.Markdown("### Paramètres d’entrée")
+                gr.Markdown("### Assess your physical level")
                 comps, names = [], []
 
                 for spec in feature_specs:
@@ -72,15 +72,15 @@ def render_ml_tab(
                     comps.append(comp)
                     names.append(name)
 
-                btn = gr.Button("Prédire", variant="primary")
+                btn = gr.Button("Predict", variant="primary")
 
 
             with gr.Column():
-                gr.Markdown("### Prédiction")
-                y_out = gr.Number(label=target_name, interactive=False, precision=2)
+                gr.Markdown("### Your physical level")
+                y_out = gr.Number(label="Physical experience level notation", interactive=False, precision=2)
 
                 meta_out = gr.Textbox(
-                    label="Infos",
+                    label="Informations",
                     interactive=False,
                     lines=4,        # hauteur minimale (ex: 4 lignes)
                     max_lines=8,    # hauteur max avant scroll
@@ -94,34 +94,6 @@ def render_ml_tab(
             gr.Examples(examples=rows, inputs=comps, label="Exemples")
 
         gr.Markdown("---")
-
-        # ====== DataTable de validation ======
-        gr.Markdown(f"### Échantillon validation — colonnes ({', '.join(display_headers)})")
-        table = gr.Dataframe(
-            headers=display_headers,
-            value=pd.DataFrame(columns=display_headers),
-            interactive=False,
-            wrap=True,
-            label="Validation (features + cible si dispo)",
-            row_count=(0, "dynamic"),
-            col_count=len(display_headers),
-            datatype=["number"] * len(display_headers),
-        )
-        refresh_btn = gr.Button("Recharger les données 🔄")
-
-        def _load_table():
-            # On reste sur les colonnes “métier” (Age, Weight (kg), Gender, cible)
-            df = load_val_subset(db_path, ui_feature_names, target_name, limit=500)
-            for col in df.columns:
-                try:
-                    df[col] = pd.to_numeric(df[col])
-                except (ValueError, TypeError):
-                    pass
-            return df
-
-        if on_load is not None:
-            on_load(fn=_load_table, inputs=None, outputs=table)
-        refresh_btn.click(_load_table, None, table)
 
         # ====== Prédiction ======
         def _fn(*vals):
@@ -159,12 +131,12 @@ def render_ml_tab(
         df_sum = report_summary_df(rep)
         df_mets = report_metrics_df(rep)
 
-        gr.Markdown("### Rapport modèle")
+        gr.Markdown("### Machine Learning model evaluation report")
         gr.Dataframe(
             value=df_sum,
             interactive=False,
             wrap=True,
-            label="Résumé",
+            label="Summary",
             row_count=(0, "dynamic"),
             col_count=df_sum.shape[1],
         )
@@ -172,7 +144,7 @@ def render_ml_tab(
             value=df_mets,
             interactive=False,
             wrap=True,
-            label="Métriques par modèle",
+            label="Metrics by model",
             row_count=(0, "dynamic"),
             col_count=df_mets.shape[1],
         )
