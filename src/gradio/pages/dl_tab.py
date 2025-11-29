@@ -1,8 +1,7 @@
 import gradio as gr
 
 # Import du helper que tu viens de créer
-from ..helpers.select_nlp_model import on_model_change
-
+from ..helpers.model_manager import on_model_change, generate_text_with_model
 
 def render_dl_tab(app_desc_dl: str) -> None:
     """Onglet Deep Learning (sélection du modèle + prompt + sortie texte)."""
@@ -31,7 +30,9 @@ def render_dl_tab(app_desc_dl: str) -> None:
             "No model loaded yet. Select one from the list above.",
         )
 
-        # Champ Prompt (éditable)
+        gr.Markdown("---")
+
+                # Champ Prompt (éditable)
         prompt_box = gr.Textbox(
             label="Prompt",
             interactive=True,
@@ -42,11 +43,25 @@ def render_dl_tab(app_desc_dl: str) -> None:
             ),
         )
 
+        # Bouton "Générer" centré sous le prompt
+        with gr.Row():
+            gr.Column(scale=1)  # espace à gauche
+            with gr.Column(scale=1):
+                generate_btn = gr.Button("Générer")
+            gr.Column(scale=1)  # espace à droite
+
         # Zone d’affichage du texte généré (programme) – >2000 caractères OK
         generated_text = gr.Textbox(
             label="Generated program",
             lines=20,
             max_lines=40,
+        )
+
+        # Wiring : clic sur "Générer" → appelle le modèle sélectionné avec le prompt
+        generate_btn.click(
+            fn=generate_text_with_model,
+            inputs=[model_selector, prompt_box],
+            outputs=generated_text,
         )
 
         # --- Callbacks ---
