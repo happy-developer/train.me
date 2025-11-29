@@ -4,8 +4,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 
+from ..generators.gpt2_fine_tuning_text_generator import GPT2_FineTuningTextGenerator
 from ..generators.transformer_text_generator import TransformerTextGenerator
 from ..generators.lstm_text_generator import LSTMTextGenerator  # en haut du fichier si pas déjà fait
 
@@ -105,9 +105,10 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
 
     info = MODEL_REGISTRY[model_name]
 
-        # -------------------- Cas KERAS : LSTM / Transformer --------------------
+    # ------------------------------------------------------------------
+    # 1) Modèles Keras : LSTM & Transformer
+    # ------------------------------------------------------------------
     if info["type"] == "keras":
-        # S'assurer que le modèle est bien chargé
         if model_name not in LOADED_MODELS:
             on_model_change(model_name)
 
@@ -130,9 +131,29 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
             )
 
         return f"Text generation is not implemented yet for Keras model '{model_name}'."
-    
-    if info["type"] == "gpt2":
-        return f"Text generation is not implemented yet for model '{model_name}'."
 
-    # -------------------- Type inconnu --------------------
-    return f"Unsupported model type: {info['type']}"
+    # ------------------------------------------------------------------
+    # 2) GPT-2 Fine-tuning uniquement
+    # ------------------------------------------------------------------
+    if info["type"] == "gpt2":
+        if model_name not in LOADED_MODELS:
+            on_model_change(model_name)
+
+        if model_name == "GPT2 Fine-tuning":
+            fine_tuned_gpt2_gen = GPT2_FineTuningTextGenerator(
+                model=LOADED_MODELS[model_name],
+                tokenizer=LOADED_TOKENIZERS[model_name],
+                max_new_tokens=256,
+            )
+
+            return fine_tuned_gpt2_gen.generate_text(
+                prompt=prompt,
+                temperature=0.9,   # réglage recommandé dans ton notebook
+                top_p=0.95,
+                strip_prompt=True,
+            )
+
+    # ------------------------------------------------------------------
+    # 3) Type non géré
+    # ------------------------------------------------------------------
+    return f"Text generation is not implemented yet for model '{model_name}'."
