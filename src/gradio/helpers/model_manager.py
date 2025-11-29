@@ -6,6 +6,7 @@ from tensorflow.keras import layers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
+from ..generators.transformer_text_generator import TransformerTextGenerator
 from ..generators.lstm_text_generator import LSTMTextGenerator  # en haut du fichier si pas déjà fait
 
 from .custom_layers import MultiHeadSelfAttention, PositionalEmbedding, TransformerBlock
@@ -104,57 +105,34 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
 
     info = MODEL_REGISTRY[model_name]
 
-    # On se concentre d'abord sur GPT-2 pour la génération
-    if model_name == "LSTM":
-            try:
-                lstm_gen = LSTMTextGenerator.get_instance(LOADED_MODELS[model_name])
-            except Exception as e:
-                return (
-                    "LSTM generator could not be initialized. "
-                    f"Check corpus/data loading. Details: {e}"
-                )
+        # -------------------- Cas KERAS : LSTM / Transformer --------------------
+    if info["type"] == "keras":
+        # S'assurer que le modèle est bien chargé
+        if model_name not in LOADED_MODELS:
+            on_model_change(model_name)
 
+        if model_name == "LSTM":
+            lstm_gen = LSTMTextGenerator.get_instance(LOADED_MODELS[model_name])
             return lstm_gen.generate_text(
                 seed_text=prompt,
-                num_words=40,
+                num_words=80,
                 temperature=0.8,
-                seed=None,
             )
-    
-    if model_name == "Transformer":
-        return f"Text generation is not implemented yet for model '{model_name}'."
+
+        if model_name == "Transformer":
+            transformer_gen = TransformerTextGenerator.get_instance(
+                LOADED_MODELS[model_name]
+            )
+            return transformer_gen.generate_text(
+                seed_text=prompt,
+                num_words=80,
+                temperature=0.9,
+            )
+
+        return f"Text generation is not implemented yet for Keras model '{model_name}'."
     
     if info["type"] == "gpt2":
         return f"Text generation is not implemented yet for model '{model_name}'."
 
-    # Sécurité PyTorch
-    try:
-        _ = torch.__version__
-    except Exception:
-        return "PyTorch is not available in this environment. GPT-2 generation is disabled."
-
-    # S'assurer que le modèle / tokenizer sont chargés
-    if model_name not in LOADED_MODELS or model_name not in LOADED_TOKENIZERS:
-        on_model_change(model_name)
-
-    model = LOADED_MODELS[model_name]
-    tokenizer = LOADED_TOKENIZERS[model_name]
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model.to(device)
-    model.eval()
-
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-
-    with torch.no_grad():
-        output_ids = model.generate(
-            **inputs,
-            max_new_tokens=256,
-            do_sample=True,
-            top_p=0.9,
-            temperature=0.9,
-            pad_token_id=tokenizer.eos_token_id,
-        )
-
-    generated = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-    return generated
+    # -------------------- Type inconnu --------------------
+    return f"Unsupported model type: {info['type']}"
