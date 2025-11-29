@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from ..generators.gpt2_distillation_text_generator import GPT2_DistilledTextGenerator
 from ..generators.gpt2_fine_tuning_text_generator import GPT2_FineTuningTextGenerator
 from ..generators.transformer_text_generator import TransformerTextGenerator
 from ..generators.lstm_text_generator import LSTMTextGenerator  # en haut du fichier si pas déjà fait
@@ -150,6 +151,19 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
                 prompt=prompt,
                 temperature=0.9,   # réglage recommandé dans ton notebook
                 top_p=0.95,
+                strip_prompt=True,
+            )
+        
+        if model_name == "GPT2 Distillation":
+            distilled_gpt2_gen = GPT2_DistilledTextGenerator(
+                model=LOADED_MODELS[model_name],
+                tokenizer=LOADED_TOKENIZERS[model_name],
+                max_new_tokens=256,
+            )
+            return distilled_gpt2_gen.generate_text(
+                prompt=prompt,
+                temperature=0.8,   # un poil plus "sage" pour le student
+                top_p=0.9,
                 strip_prompt=True,
             )
 
