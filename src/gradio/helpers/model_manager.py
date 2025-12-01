@@ -1,4 +1,6 @@
 from pathlib import Path
+import pandas as pd
+import json
 import re
 import numpy as np
 import tensorflow as tf
@@ -27,6 +29,7 @@ MODEL_REGISTRY = {
     "LSTM": {
         "type": "keras",
         "path": MODEL_DIR / "lstm_wordlevel_v1.keras",
+        "report_path": MODEL_DIR / "LSTM_model_report.json",
     },
     "Transformer": {
         "type": "keras",
@@ -171,3 +174,73 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
     # 3) Type non géré
     # ------------------------------------------------------------------
     return f"Text generation is not implemented yet for model '{model_name}'."
+
+
+def get_dl_model_report_components(model_name: str):
+    """
+    Retourne 4 DataFrames Gradio-ready :
+    - Summary
+    - Model
+    - Training
+    - Metrics
+
+    Si pas de rapport → retourne les DF vides.
+    """
+    info = MODEL_REGISTRY.get(model_name)
+    if not info:
+        return _empty_dl_dfs()
+
+    report_path = info.get("report_path")
+    if not report_path or not report_path.exists():
+        return _empty_dl_dfs()
+
+    try:
+        data = json.loads(report_path.read_text(encoding="utf-8"))
+    except Exception:
+        return _empty_dl_dfs()
+
+    # Summary
+    summary_keys = [
+        "created_at",
+        "task",
+        "target",
+        "n_train_samples",
+        "n_val_samples",
+        "vocab_size",
+        "sequence_length",
+        "device",
+    ]
+    df_summary = pd.DataFrame(
+        [(k, data.get(k, "")) for k in summary_keys],
+        columns=["Key", "Value"]
+    )
+
+    # Model config
+    model_cfg = data.get("model", {})
+    df_model = pd.DataFrame(
+        [(k, v) for k, v in model_cfg.items()],
+        columns=["Key", "Value"]
+    )
+
+    # Training
+    training_cfg = data.get("training", {})
+    df_training = pd.DataFrame(
+        [(k, v) for k, v in training_cfg.items()],
+        columns=["Key", "Value"]
+    )
+
+    # Metrics
+    metrics_cfg = data.get("metrics", {})
+    df_metrics = pd.DataFrame(
+        [(k, v) for k, v in metrics_cfg.items()],
+        columns=["Metric", "Value"]
+    )
+
+    return df_summary, df_model, df_training, df_metrics
+
+
+def _empty_dl_dfs():
+    """Retourne 4 DataFrames vides pour éviter les erreurs."""
+    empty = pd.DataFrame({"Key": [], "Value": []})
+    empty_metrics = pd.DataFrame({"Metric": [], "Value": []})
+    return empty, empty, empty, empty_metrics

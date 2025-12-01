@@ -1,7 +1,12 @@
 import gradio as gr
+import pandas as pd
 
-# Import du helper que tu viens de créer
-from ..helpers.model_manager import on_model_change, generate_text_with_model
+# Import du helper
+from ..helpers.model_manager import (
+    on_model_change,
+    generate_text_with_model,
+    get_dl_model_report_components,
+)
 
 def render_dl_tab(app_desc_dl: str) -> None:
     """Onglet Deep Learning (sélection du modèle + prompt + sortie texte)."""
@@ -32,7 +37,7 @@ def render_dl_tab(app_desc_dl: str) -> None:
 
         gr.Markdown("---")
 
-                # Champ Prompt (éditable)
+        # Champ Prompt (éditable)
         prompt_box = gr.Textbox(
             label="Prompt",
             interactive=True,
@@ -64,14 +69,49 @@ def render_dl_tab(app_desc_dl: str) -> None:
             outputs=generated_text,
         )
 
-        # --- Callbacks ---
+        # Tableaux du rapport DL
+        gr.Markdown("### Deep Learning model evaluation report")
 
+        dl_sum = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Summary",
+        )
+
+        dl_model = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Model",
+        )
+
+        dl_training = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Training",
+        )
+
+        dl_metrics = gr.Dataframe(
+            value=pd.DataFrame({"Metric": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Metrics",
+        )
+       
+        # --- Callbacks ---
+        def _on_dl_model_select(name: str):
+            status = on_model_change(name)
+            df_sum, df_model, df_training, df_metrics = get_dl_model_report_components(name)
+            return status, df_sum, df_model, df_training, df_metrics
+        
         # Quand on change de modèle, on charge via on_model_change()
         # et on affiche le message de statut dans model_status
         model_selector.change(
-            fn=on_model_change,
+            fn=_on_dl_model_select,
             inputs=model_selector,
-            outputs=model_status,
+            outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
         )
 
     # Retour des composants si tu veux les réutiliser plus tard
