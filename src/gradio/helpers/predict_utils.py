@@ -53,7 +53,6 @@ def ui_to_internal_row(
     return pd.DataFrame([row], columns=expected_cols)
 
 
-
 def predict_single(
     payload: Dict[str, object],
     internal_expected: List[str],
@@ -70,6 +69,31 @@ def predict_single(
     Implémentation officielle :
     UI → encodage Gender → scaling features → prédiction → inverse_transform cible.
     """
+
+    # 0) Règle métier : si Workout_Type == "None" → prédiction forcée à 1 XP
+    workout_type_raw = payload.get("Workout_Type")
+    if isinstance(workout_type_raw, str) and workout_type_raw.strip().lower() == "none":
+        y_xp = 1.0
+
+        # Logging même si règle métier
+        log_prediction(
+            log_dir=log_dir,
+            row_in=payload,
+            y_hat=y_xp,
+            latency_ms=0,
+            model_filename=model_path.name,
+            model_version=schema.get("model_version", "unknown"),
+            target_name=target_name,
+        )
+
+        meta = (
+            f"Model: {model_path.name} | "
+            f"Version: {schema.get('model_version','?')} | "
+            f"Features: {', '.join(internal_expected)} | "
+            f"Rule applied: Workout_Type=None → y_xp=1"
+        )
+        return y_xp, meta
+
     # 1) Construire le DF interne
     X_raw = ui_to_internal_row(payload, internal_expected, gender_encoder)
 
@@ -84,17 +108,17 @@ def predict_single(
     y_std = float(model.predict(X_scaled)[0])
 
     # 4) Remise en unités réelles
-    y_kcal = float(target_scaler.inverse_transform(np.array([[y_std]]))[0, 0])
-    y_kcal = round(y_kcal, 2)
+    y_xp = float(target_scaler.inverse_transform(np.array([[y_std]]))[0, 0])
+    y_xp = round(y_xp, 2)
 
     # 5) Logging
     log_prediction(
         log_dir=log_dir,
         row_in=payload,
-        y_hat=y_kcal,
-        latency_ms=0,  # tu peux ajouter une mesure de temps si tu veux
+        y_hat=y_xp,
+        latency_ms=0,
         model_filename=model_path.name,
-        model_version= schema.get("model_version", "unknown"),
+        model_version=schema.get("model_version", "unknown"),
         target_name=target_name,
     )
 
@@ -103,4 +127,5 @@ def predict_single(
         f"Version: {schema.get('model_version','?')} | "
         f"Features: {', '.join(internal_expected)}"
     )
-    return y_kcal, meta
+    return y_xp, meta
+

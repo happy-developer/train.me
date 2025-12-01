@@ -5,8 +5,8 @@ inference_full_columns:
 
   Age:
     type: integer
-    min: 10
-    max: 120
+    min: 18
+    max: 60
 
   Gender:
     type: string
@@ -114,8 +114,8 @@ inference_test:
 
   Age:
     type: integer
-    min: 10
-    max: 120
+    min: 18
+    max: 60
 
   Gender:
     type: string
@@ -136,14 +136,16 @@ inference_test:
   #   min: 11.0
   #   max: 35.0
 
-  Workout_Type:
-    type: string
-    enum: ["Cardio", "Strength", "HIIT", "Yoga", "Pilates", "Other"]
-
   Workout_Frequency (days/week):
     type: number
-    min: 1.94
-    max: 5.06
+    min: 0
+    max: 7
+
+  Workout_Type:
+    type: string
+    enum: ["Cardio", "Strength", "HIIT", "Yoga", "None"]
+
+
 
   # Body Part:
   #   type: string

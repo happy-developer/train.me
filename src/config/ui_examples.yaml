@@ -2,74 +2,66 @@
 # Chaque entrée représente un exemple complet d'utilisateur typique.
 UI_EXAMPLES:
 
-  - Age: 34.91
+  - Experience_Level: 2.01
+    Age: 34.91
     Gender: "Male"
     Weight (kg): 65.27
     Height (m): 1.62
     Workout_Type: "Strength"
-    # Body Part: "Legs"
     Workout_Frequency (days/week): 3.99
-    # Fat_Percentage: 26.800377179186803
 
-  - Age: 23.37
+  - Experience_Level: 2.01
+    Age: 23.37
     Gender: "Female"
     Weight (kg): 56.41
     Height (m): 1.55
     Workout_Type: "HIIT"
-    # Body Part: "Chest"
     Workout_Frequency (days/week): 4.0
-    # Fat_Percentage: 27.65502087929296
 
-  - Age: 33.2
+  - Experience_Level: 1.02
+    Age: 33.2
     Gender: "Female"
     Weight (kg): 58.98
     Height (m): 1.67
     Workout_Type: "Cardio"
-    # Body Part: "Arms"
     Workout_Frequency (days/week): 2.99
-    # Fat_Percentage: 24.320821254687547
 
-  - Age: 38.69
+  - Experience_Level: 1.99
+    Age: 38.69
     Gender: "Female"
     Weight (kg): 93.78
     Height (m): 1.7
     Workout_Type: "HIIT"
-    # Body Part: "Shoulders"
     Workout_Frequency (days/week): 3.99
-    # Fat_Percentage: 32.81357179645506
 
-  - Age: 45.09
+  - Experience_Level: 2.0
+    Age: 45.09
     Gender: "Male"
     Weight (kg): 52.42
     Height (m): 1.88
     Workout_Type: "Strength"
-    # Body Part: "Abs"
     Workout_Frequency (days/week): 4.0
-    # Fat_Percentage: 17.30731864063283
 
-  - Age: 53.19
+  - Experience_Level: 1.0
+    Age: 53.19
     Gender: "Female"
     Weight (kg): 105.05
     Height (m): 1.84
     Workout_Type: "Yoga"
-    # Body Part: "Arms"
     Workout_Frequency (days/week): 3.02
-    # Fat_Percentage: 32.04906411038813
 
-  - Age: 23.17
+  - Experience_Level: 3.0
+    Age: 23.17
     Gender: "Male"
     Weight (kg): 58.41
     Height (m): 1.78
     Workout_Type: "Strength"
-    # Body Part: "Shoulders"
     Workout_Frequency (days/week): 4.96
-    # Fat_Percentage: 20.546292182588086
 
-  - Age: 55.92
+  - Experience_Level: 2.01
+    Age: 55.92
     Gender: "Female"
     Weight (kg): 84.07
     Height (m): 1.63
     Workout_Type: "Yoga"
-    # Body Part: "Back"
     Workout_Frequency (days/week): 3.97
-    # Fat_Percentage: 32.08817620708069

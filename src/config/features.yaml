@@ -32,9 +32,9 @@ selected_features_test:
   - Gender
   - Weight (kg)
   - Height (m)
+  - Workout_Frequency (days/week)
   - Workout_Type
   # - Body Part
-  - Workout_Frequency (days/week)
   # - Fat_Percentage
 
 

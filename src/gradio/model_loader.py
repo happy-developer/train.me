@@ -17,7 +17,7 @@ def load_model_and_schema(model_path: Path, schema_path: Path):
         schema = json.load(f)
 
     # --- Extraction des infos principales ---
-    target_name = schema.get("target", "Calories_Burned")
+    target_name = schema.get("target", "Experience_level")
     features = schema.get("features", [])
 
     # --- Ordre des colonnes attendu par le modèle ---
