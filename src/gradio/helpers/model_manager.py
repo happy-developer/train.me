@@ -4,7 +4,7 @@ import json
 import re
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from ..generators.gpt2_distillation_text_generator import GPT2_DistilledTextGenerator
@@ -27,21 +27,24 @@ MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 
 MODEL_REGISTRY = {
     "LSTM": {
-        "type": "keras",
-        "path": MODEL_DIR / "lstm_wordlevel_v1.keras",
+        "type": "pt",
+        "path": MODEL_DIR / "lstm_v2.pt",
         "report_path": MODEL_DIR / "LSTM_model_report.json",
     },
     "Transformer": {
-        "type": "keras",
-        "path": MODEL_DIR / "transformer_wordlevel_v1.keras",
+        "type": "pt",
+        "path": MODEL_DIR / "transformer_v2.pt",
+        "report_path": MODEL_DIR / "Transformer_model_report.json",
     },
     "GPT2 Fine-tuning": {
         "type": "gpt2",
-        "path": MODEL_DIR / "gpt2_trainme_best_finetuned",
+        "path": MODEL_DIR / "gpt2_trainme_fine_tuning_gpt2_v3",
+        "report_path": MODEL_DIR / "GPT2_Fine_Tuning_model_report.json",
     },
     "GPT2 Distillation": {
         "type": "gpt2",
-        "path": MODEL_DIR / "gpt2_trainme_best_student_distilled",
+        "path": MODEL_DIR / "gpt2_trainme_distillation_gpt2_v3",
+        "report_path": MODEL_DIR / "GPT2_Distillation_model_report.json",
     },
 }
 
@@ -53,8 +56,6 @@ LOADED_TOKENIZERS = {}
 # ---------------------------------------------------------------------
 # Fonction appelée par ton événement Gradio lors du changement de modèle
 # ---------------------------------------------------------------------
-
-
 def on_model_change(model_name: str) -> str:
     """
     Charge le modèle NLP correspondant au nom sélectionné.
@@ -68,25 +69,21 @@ def on_model_change(model_name: str) -> str:
     if model_name in LOADED_MODELS:
         return f"Model loaded from cache: {model_path}"
 
-    if info["type"] == "keras":
-        # Par défaut, on reste en safe_mode pour les modèles simples (LSTM)
-        custom_objects = {}
-        safe_mode = True
+    model_path_str = str(model_path)
 
-        # Transformer : couches custom + Lambda → safe_mode désactivé
-        if model_name == "Transformer":
-            custom_objects["PositionalEmbedding"] = PositionalEmbedding
-            custom_objects["TransformerBlock"] = TransformerBlock
-            custom_objects["MultiHeadSelfAttention"] = MultiHeadSelfAttention
-            safe_mode = False
+    if info["type"] == "pt":
+        # ------------------------------------------------------------------
+        # 1) Modèles PyTorch (.pt) : LSTM / Transformer v2
+        # ------------------------------------------------------------------
+        if model_path_str.endswith(".pt"):
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            model = torch.load(model_path, map_location=device)
 
-        model = tf.keras.models.load_model(
-            model_path,
-            custom_objects=custom_objects or None,  # None pour LSTM
-            safe_mode=safe_mode,
-            compile=False,  # on ne réentraîne pas dans Gradio, juste inférence
-        )
-        LOADED_MODELS[model_name] = model
+            # On passe en mode eval si possible
+            if hasattr(model, "eval"):
+                model.eval()
+
+            LOADED_MODELS[model_name] = model
 
     elif info["type"] == "gpt2":
         model = AutoModelForCausalLM.from_pretrained(model_path)
@@ -112,10 +109,13 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
     # ------------------------------------------------------------------
     # 1) Modèles Keras : LSTM & Transformer
     # ------------------------------------------------------------------
-    if info["type"] == "keras":
+    if info["type"] == "pt":
         if model_name not in LOADED_MODELS:
             on_model_change(model_name)
 
+        # ------------------------------------------------------------------
+        # 1) LSTM  (PyTorch ou Keras, peu importe pour le wrapper)
+        # ------------------------------------------------------------------
         if model_name == "LSTM":
             lstm_gen = LSTMTextGenerator.get_instance(LOADED_MODELS[model_name])
             return lstm_gen.generate_text(
@@ -124,9 +124,12 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
                 temperature=0.8,
             )
 
+        # ------------------------------------------------------------------
+        # 2) Transformer (idem, backend abstrait par le wrapper)
+        # ------------------------------------------------------------------
         if model_name == "Transformer":
             transformer_gen = TransformerTextGenerator.get_instance(
-                LOADED_MODELS[model_name]
+                LOADED_MODELS[model_name]  # state_dict OU nn.Module
             )
             return transformer_gen.generate_text(
                 seed_text=prompt,
