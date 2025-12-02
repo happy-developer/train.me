@@ -5,6 +5,8 @@ from collections import OrderedDict
 import numpy as np
 import torch
 import torch.nn as nn
+import pandas as pd  # <-- NEW
+
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
@@ -12,20 +14,26 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 class LSTMTextGenerator:
     """
     Gestionnaire dédié pour le LSTM :
-    - reçoit un modèle déjà chargé (Keras ou PyTorch) depuis on_model_change
+    - reçoit un modèle déjà chargé (PyTorch ou Keras) depuis on_model_change
     - OU un state_dict PyTorch (OrderedDict) → reconstruit alors un nn.Module
     - charge + nettoie le corpus texte
-    - recrée le tokenizer (identique au notebook)
+    - recrée le tokenizer (identique au notebook LSTM v3)
     - génère du texte à partir d'un seed.
-
-    Utilisation côté app :
-        lstm_gen = LSTMTextGenerator.get_instance(model_or_state_dict)
-        text = lstm_gen.generate_text("mon prompt ...")
     """
 
-    # Références au projet / corpus
-    CORPUS_DIR = (Path(__file__).resolve().parents[2] / "data" / "raw" / "nlp")
-    CORPUS_LENGTH_PARAM = "_car_FULL_"  # filtre utilisé dans le notebook
+    # Racine du projet + chemin vers le corpus CSV
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+    CORPUS_CSV_PATH = PROJECT_ROOT / "gradio" / "nlp" / "program_summary.csv"
+
+    # Colonnes textuelles utilisées dans le notebook LSTM v3
+    TEXT_COLUMNS = [
+        "program_title",
+        "description",
+        "goal",
+        "target_muscles",
+        "equipment",
+        "instructions",
+    ]
 
     # Longueur de séquence par défaut (cf. LSTM_model_report.json)
     DEFAULT_SEQUENCE_LENGTH = 15
@@ -67,11 +75,8 @@ class LSTMTextGenerator:
             embedding.weight  -> (vocab_size, embedding_dim)
             lstm.weight_ih_l0 -> (4*hidden_dim, embedding_dim)
             fc.weight         -> (vocab_size, hidden_dim)
-
-        Si la structure ne correspond pas, lève une erreur explicite.
         """
 
-        # 1) Récupérer les tenseurs clés
         emb_weight = state.get("embedding.weight", None)
         fc_weight = state.get("fc.weight", None)
         lstm_weight_ih_l0 = state.get("lstm.weight_ih_l0", None)
@@ -81,22 +86,17 @@ class LSTMTextGenerator:
                 "Impossible de reconstruire le LSTM PyTorch : "
                 "les clés attendues 'embedding.weight', 'lstm.weight_ih_l0', "
                 "'fc.weight' sont absentes du state_dict. "
-                "Vérifie la structure de ton modèle LSTM."
             )
 
-        # 2) Inférer les dimensions
         vocab_size, embedding_dim = emb_weight.shape
         out_features, hidden_dim = fc_weight.shape
 
-        # Sécurité : en LM, on s'attend à out_features == vocab_size
         if out_features != vocab_size:
-            # On ne bloque pas, mais on prévient
             print(
                 f"[LSTMTextGenerator] Avertissement : fc.weight shape={fc_weight.shape} "
                 f"→ out_features != vocab_size ({out_features} != {vocab_size})."
             )
 
-        # Nombre de couches LSTM : on regarde les weight_ih_lX successifs
         num_layers = 1
         for n in range(1, 10):
             if f"lstm.weight_ih_l{n}" in state:
@@ -104,7 +104,6 @@ class LSTMTextGenerator:
             else:
                 break
 
-        # 3) Définir un modèle standard compatible avec ces dimensions
         class TorchLSTMLanguageModel(nn.Module):
             def __init__(self, vocab_size, embedding_dim, hidden_dim, num_layers):
                 super().__init__()
@@ -118,10 +117,9 @@ class LSTMTextGenerator:
                 self.fc = nn.Linear(hidden_dim, vocab_size)
 
             def forward(self, x):
-                # x: (batch, seq_len)
-                emb = self.embedding(x)  # (batch, seq_len, embed_dim)
-                out, _ = self.lstm(emb)  # (batch, seq_len, hidden_dim)
-                logits = self.fc(out)    # (batch, seq_len, vocab_size)
+                emb = self.embedding(x)          # (batch, seq_len, embed_dim)
+                out, _ = self.lstm(emb)          # (batch, seq_len, hidden_dim)
+                logits = self.fc(out)            # (batch, seq_len, vocab_size)
                 return logits
 
         model = TorchLSTMLanguageModel(
@@ -142,26 +140,23 @@ class LSTMTextGenerator:
         Retourne une unique instance de LSTMTextGenerator, initialisée à partir :
         - d'un modèle LSTM déjà chargé (Keras ou PyTorch)
         - ou d'un state_dict PyTorch (OrderedDict)
-        - du corpus texte dans CORPUS_DIR
+        - du corpus texte dans data/programs/program_summary.csv
         """
         if cls._instance is not None:
             return cls._instance
 
-        # Charger + nettoyer le corpus
+        # Charger + nettoyer le corpus (version CSV anglaise)
         full_text_clean = cls._load_full_clean_corpus()
 
         # Recréer le tokenizer EXACT comme dans le notebook
         tokenizer = cls.build_tokenizer_from_corpus(full_text_clean)
 
-        # Tentative de déduire max_length depuis le modèle Keras
-        max_length = None
+        max_length = cls.DEFAULT_SEQUENCE_LENGTH
         if hasattr(model, "input_shape") and getattr(model, "input_shape") is not None:
             try:
                 max_length = int(model.input_shape[1]) + 1
             except Exception:
-                max_length = cls.DEFAULT_SEQUENCE_LENGTH
-        else:
-            max_length = cls.DEFAULT_SEQUENCE_LENGTH
+                pass
 
         cls._instance = cls(
             model=model,
@@ -176,30 +171,35 @@ class LSTMTextGenerator:
     @classmethod
     def _load_full_clean_corpus(cls) -> str:
         """
-        Reproduit la logique du notebook :
-        - charge les .txt dans CORPUS_DIR
-        - filtre via CORPUS_LENGTH_PARAM
-        - concatène
+        Version LSTM v3 :
+        - charge `program_summary.csv`
+        - concatène plusieurs colonnes textuelles
         - applique clean_text(...)
         """
-        corpus_dir = cls.CORPUS_DIR
-        if not corpus_dir.exists():
-            raise FileNotFoundError(f"Corpus directory not found: {corpus_dir}")
+        csv_path = cls.CORPUS_CSV_PATH
+        if not csv_path.exists():
+            raise FileNotFoundError(f"Corpus CSV not found: {csv_path}")
 
-        corpus_paths = sorted(
-            p
-            for p in corpus_dir.glob("*.txt")
-            if (not cls.CORPUS_LENGTH_PARAM or cls.CORPUS_LENGTH_PARAM in p.name)
-        )
+        df = pd.read_csv(csv_path)
 
-        if not corpus_paths:
-            raise FileNotFoundError(
-                f"No corpus .txt files found in {corpus_dir} "
-                f"(filter='{cls.CORPUS_LENGTH_PARAM}')."
+        # On garde seulement les colonnes réellement présentes
+        text_cols = [c for c in cls.TEXT_COLUMNS if c in df.columns]
+        if not text_cols:
+            raise ValueError(
+                f"Aucune des colonnes textuelles attendues {cls.TEXT_COLUMNS} "
+                f"n'a été trouvée dans {csv_path.name}."
             )
 
-        texts = [p.read_text(encoding="utf-8").strip() for p in corpus_paths]
-        full_text = "\n".join(texts)
+        df[text_cols] = df[text_cols].fillna("")
+
+        # Concaténation ligne par ligne (comme dans le notebook)
+        lines = []
+        for _, row in df[text_cols].iterrows():
+            line = " ".join(str(row[c]) for c in text_cols).strip()
+            if line:
+                lines.append(line)
+
+        full_text = "\n".join(lines)
         return cls.clean_text(full_text)
 
     @staticmethod
@@ -213,11 +213,6 @@ class LSTMTextGenerator:
 
     @staticmethod
     def build_tokenizer_from_corpus(full_text_clean: str) -> Tokenizer:
-        """
-        Reproduit le tokenizer exact du notebook :
-            tokenizer = Tokenizer(filters='', lower=False, oov_token='<UNK>')
-            tokenizer.fit_on_texts([full_text_clean])
-        """
         tok = Tokenizer(filters="", lower=False, oov_token="<UNK>")
         tok.fit_on_texts([full_text_clean])
         return tok
@@ -226,29 +221,16 @@ class LSTMTextGenerator:
     # Prédiction : unification Keras / PyTorch
     # ----------------------------------------------------------------------
     def _predict_proba(self, token_list: np.ndarray) -> np.ndarray:
-        """
-        Retourne un vecteur de probabilités sur le vocabulaire.
-        Gère automatiquement :
-        - Keras (model.predict)
-        - PyTorch (model.forward → logits → softmax)
-        """
         if self._is_torch:
             x = torch.from_numpy(token_list).long().to(self.device)
-
             with torch.no_grad():
                 logits = self.model(x)
-
-                # Compatibilité (batch, vocab) vs (batch, seq, vocab)
                 if logits.dim() == 3:
-                    logits = logits[:, -1, :]  # dernier token de la séquence
-
-                logits = logits[0]  # vocab_size
+                    logits = logits[:, -1, :]
+                logits = logits[0]
                 probs = torch.softmax(logits, dim=-1).cpu().numpy()
-
             return probs
-
         else:
-            # Modèle Keras classique
             preds = self.model.predict(token_list, verbose=0)
             return preds[0]
 
@@ -262,42 +244,29 @@ class LSTMTextGenerator:
         temperature: float = 0.8,
         seed: int | None = None,
     ) -> str:
-        """
-        Génère du texte à partir d'un texte de départ.
-        Reprend la logique notebook (pad_sequences → prédiction → tirage).
-        """
         rng = np.random.default_rng(seed) if seed is not None else np.random
-
         generated_text = seed_text
 
         for _ in range(num_words):
-            # Tokenisation + padding
             token_list = self.tokenizer.texts_to_sequences([generated_text])[0]
-
             token_list = pad_sequences(
                 [token_list],
                 maxlen=self.max_length - 1,
                 padding="pre",
             )
 
-            # Probabilités
             predictions = self._predict_proba(token_list)
-
-            # Température
             predictions = np.log(predictions + 1e-7) / temperature
             predictions = np.exp(predictions) / np.sum(np.exp(predictions))
 
-            # Tirage du prochain token
             predicted_id = rng.choice(len(predictions), p=predictions)
 
-            # Conversion id → mot
             predicted_word = ""
             for word, index in self.tokenizer.word_index.items():
                 if index == predicted_id:
                     predicted_word = word
                     break
 
-            # Ajout au texte généré
             if predicted_word:
                 generated_text += " " + predicted_word
 

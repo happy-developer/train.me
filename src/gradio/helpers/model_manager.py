@@ -28,7 +28,7 @@ MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 MODEL_REGISTRY = {
     "LSTM": {
         "type": "pt",
-        "path": MODEL_DIR / "lstm_v2.pt",
+        "path": MODEL_DIR / "lstm_v3.pt",
         "report_path": MODEL_DIR / "LSTM_model_report.json",
     },
     "Transformer": {
