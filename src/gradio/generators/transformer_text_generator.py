@@ -264,7 +264,7 @@ class TransformerTextGenerator:
 
     # Références au projet / corpus
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    CORPUS_DIR = PROJECT_ROOT / "data" / "raw" / "nlp"
+    CORPUS_DIR = PROJECT_ROOT / "gradio" / "nlp"
     CORPUS_LENGTH_PARAM = "_car_FULL_"  # même filtre que dans le notebook FULL_50
 
     # Longueur de séquence par défaut (notebook FULL_50)

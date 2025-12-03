@@ -42,7 +42,7 @@ from .helpers.sqlite_utils import load_val_subset
 
 # ---------- UI ----------
 def build_app():
-    app_title = f"TrAIn.me — ({schema.get('model_version','v?')})"
+    app_title = f"TrAIn.me — (v4.3-minimal)"
     app_desc_ml = f"Personalize your experience"
     app_desc_ex = "Choose your training program"
     app_desc_dl = "Generate your personalized exercise"

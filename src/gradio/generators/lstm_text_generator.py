@@ -23,7 +23,7 @@ class LSTMTextGenerator:
 
     # Racine du projet + chemin vers le corpus CSV
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    CORPUS_CSV_PATH = PROJECT_ROOT / "gradio" / "nlp" / "program_summary.csv"
+    CORPUS_CSV_PATH = PROJECT_ROOT / "gradio" / "data" / "program_summary.csv"
 
     # Colonnes textuelles utilisées dans le notebook LSTM v3
     TEXT_COLUMNS = [

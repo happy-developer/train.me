@@ -8,7 +8,7 @@ import pandas as pd
 
 # Le notebook s’exécute depuis son répertoire → on peut repartir du cwd
 current_dir = Path.cwd()
-json_path = current_dir / "src" / "notebooks" / "dataset_fusion" / "outputs"
+json_path = current_dir / "src" / "gradio" / "data"
 
 # Chemin par défaut vers ton JSON fusionné
 DEFAULT_EXERCICES_PATH = Path(
