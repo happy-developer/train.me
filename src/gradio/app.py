@@ -16,7 +16,7 @@ MODEL_DIR   = p["MODEL_DIR"]
 MODEL_PATH  = p["MODEL_PATH"]
 FEATURE_SCALER_PATH = p.get("FEATURE_SCALER_PATH")
 TARGET_SCALER_PATH  = p.get("TARGET_SCALER_PATH")
-GENDER_ENCODER_PATH = p["GENDER_ENCODER_PATH"]
+ENCODER_PATH = p["ENCODER_PATH"]
 SCHEMA_PATH = p["SCHEMA_PATH"]
 LOGS_DIR    = p["LOGS_DIR"]; LOGS_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH     = p["DB_PATH"]
@@ -29,7 +29,7 @@ from .model_loader import load_model_and_schema, load_optional_joblib
 model, schema, TARGET_NAME, FEATURES, INTERNAL_EXPECTED = load_model_and_schema(MODEL_PATH, SCHEMA_PATH)
 fx_scaler = load_optional_joblib(FEATURE_SCALER_PATH)
 y_scaler  = load_optional_joblib(TARGET_SCALER_PATH)
-gender_encoder   = load_optional_joblib(GENDER_ENCODER_PATH)
+encoder   = load_optional_joblib(ENCODER_PATH)
 UI_FEATURE_NAMES = [f["name"] for f in FEATURES]
 
 # ---------- Helpers ----------
@@ -69,7 +69,7 @@ def build_app():
                 model_path=MODEL_PATH,
                 feature_scaler=fx_scaler,
                 target_scaler=y_scaler,
-                gender_encoder=gender_encoder,
+                encoder=encoder,
                 report_path=REPORT_PATH,
                 on_load=demo.load,
             )

@@ -12,7 +12,7 @@ import numpy as np
 def ui_to_internal_row(
     ui_dict: Dict[str, object],
     expected_cols: List[str],
-    gender_encoder,
+    encoder,
 ) -> pd.DataFrame:
 
     row = {}
@@ -21,7 +21,7 @@ def ui_to_internal_row(
     if "Gender_1.0" in expected_cols:
         g_str = ui_dict["Gender"]
         g_df = pd.DataFrame([[g_str]], columns=["Gender"])
-        g_encoded = float(gender_encoder.transform(g_df)[0, 0])
+        g_encoded = float(encoder.transform(g_df)[0, 0])
         row["Gender_1.0"] = 1.0 if g_encoded == 1.0 else 0.0
 
     # === B) WORKOUT_TYPE_* (HIIT / Strength / Yoga / Cardio) ===
@@ -63,7 +63,7 @@ def predict_single(
     model_path: Path,
     schema: dict,
     target_name: str,
-    gender_encoder,
+    encoder,
 ) -> Tuple[float, str]:
     """
     Implémentation officielle :
@@ -95,7 +95,7 @@ def predict_single(
         return y_xp, meta
 
     # 1) Construire le DF interne
-    X_raw = ui_to_internal_row(payload, internal_expected, gender_encoder)
+    X_raw = ui_to_internal_row(payload, internal_expected, encoder)
 
     # 2) Scaling des features
     X_scaled = pd.DataFrame(

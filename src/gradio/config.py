@@ -11,7 +11,7 @@ REPORT_FILENAME = "model_report.json"
 # Fichiers de scalers optionnels
 FEATURE_SCALER_FILENAME = "feature_scaler.joblib"
 TARGET_SCALER_FILENAME  = "target_scaler.joblib"
-GENDER_ENCODER_FILENAME = "gender_encoder.joblib"
+ENCODER_FILENAME = "encoder.joblib"
 
 # Le notebook s’exécute depuis son répertoire → on peut repartir du cwd
 current_dir = Path.cwd()
@@ -52,6 +52,6 @@ def build_paths(src_dir: Path) -> dict[str, Path]:
         "REPORT_PATH": Path(report_path_env) if report_path_env else model_dir / REPORT_FILENAME,
         "FEATURE_SCALER_PATH": model_dir / FEATURE_SCALER_FILENAME,
         "TARGET_SCALER_PATH":  model_dir / TARGET_SCALER_FILENAME,
-        "GENDER_ENCODER_PATH": model_dir / GENDER_ENCODER_FILENAME,
+        "ENCODER_PATH": model_dir / ENCODER_FILENAME,
     }
     return paths

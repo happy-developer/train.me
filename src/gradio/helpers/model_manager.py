@@ -43,7 +43,7 @@ MODEL_REGISTRY = {
     },
     "GPT2 Distillation": {
         "type": "gpt2",
-        "path": MODEL_DIR / "gpt2_trainme_distillation_gpt2_v3",
+        "path": MODEL_DIR / "gpt2_trainme_distillation_gpt2_v5",
         "report_path": MODEL_DIR / "GPT2_Distillation_model_report.json",
     },
 }

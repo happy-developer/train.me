@@ -25,7 +25,7 @@ def render_ml_tab(
     model_path: Path,
     feature_scaler,
     target_scaler,
-    gender_encoder,
+    encoder,
     report_path: Path,
     on_load=None,
 ) -> None:
@@ -128,17 +128,7 @@ def render_ml_tab(
             examples=rows,
             inputs=comps,
             label="Exemples (sélection rapide)"
-        )
-
-        # Converti en "tableau visuel" (mais pas utilisé par le modèle)
-        gr.Markdown("### Exemples (avec Experience_Level)")
-        gr.Dataframe(
-            value=df_examples_full,
-            interactive=False,
-            wrap=True,
-            row_count=(0, "dynamic"),
-            col_count=df_examples_full.shape[1],
-        )        
+        )    
 
 
         gr.Markdown("---")
@@ -171,7 +161,7 @@ def render_ml_tab(
                 model_path=model_path,
                 schema=schema,
                 target_name=target_name,
-                gender_encoder=gender_encoder,
+                encoder=encoder,
             )
 
             # 2) Calcul BMI & Body Fat %

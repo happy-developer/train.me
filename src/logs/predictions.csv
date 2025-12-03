@@ -255,3 +255,10 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-12-01T17:28:42.070698+00:00,34.91,Male,65.27,1.62,3.99,Strength,2.01,0,model.joblib,v4.1-minimal
 2025-12-01T18:25:38.173639+00:00,34.91,Male,65.27,1.62,3.99,Strength,2.01,0,model.joblib,v4.1-minimal
 2025-12-02T07:11:41.575951+00:00,55.0,Male,84.07,1.63,3.97,Cardio,2.0,0,model.joblib,v4.1-minimal
+2025-12-03T09:06:29.783572+00:00,2.01,34.91,Male,65.27,1.62,3.99,Strength,0,model.joblib,v4.3-minimal
+2025-12-03T09:08:22.081585+00:00,2.02,23.37,Female,56.41,1.55,4.0,HIIT,0,model.joblib,v4.3-minimal
+2025-12-03T09:08:25.527791+00:00,2.0,38.69,Female,93.78,1.7,3.99,HIIT,0,model.joblib,v4.3-minimal
+2025-12-03T09:09:38.119253+00:00,2.01,34.91,Male,65.27,1.62,3.99,Strength,0,model.joblib,v4.3-minimal
+2025-12-03T09:09:40.857568+00:00,2.02,23.37,Female,56.41,1.55,4.0,HIIT,0,model.joblib,v4.3-minimal
+2025-12-03T09:09:43.112540+00:00,1.03,33.2,Female,58.98,1.67,2.99,Cardio,0,model.joblib,v4.3-minimal
+2025-12-03T09:09:45.685928+00:00,2.0,45.09,Male,52.42,1.88,4.0,Strength,0,model.joblib,v4.3-minimal
