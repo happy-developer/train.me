@@ -14,7 +14,7 @@ def render_dl_tab(
     level_out: gr.Textbox,
     wf_comp: gr.Component,
     wt_comp: gr.Component,
-    selected_program_df: gr.State,  # en réalité: dict stocké dans un State
+    selected_program_df: gr.State,  # dict dans un State
 ) -> dict:
     """Onglet Deep Learning (sélection du modèle + prompt + sortie texte)."""
 
@@ -56,12 +56,19 @@ def render_dl_tab(
 
         gr.Markdown(
             "These values are synchronized with your Machine Learning profile "
-            "and can be used to guide the generated program."
+            "and are used to build the Deep Learning prompt automatically."
         )
 
         gr.Markdown(
             "## Generate your personalized exercise\n"
             "Prediction based on your information and the program selected from the list"
+        )
+
+        # Champ Prompt (auto-généré, non éditable)
+        prompt_box = gr.Textbox(
+            label="Prompt sent to the Deep Learning model",
+            interactive=False,
+            lines=4,
         )
 
         # Sélecteur du modèle DL
@@ -83,23 +90,12 @@ def render_dl_tab(
 
         gr.Markdown("---")
 
-        # Champ Prompt (éditable)
-        prompt_box = gr.Textbox(
-            label="Prompt",
-            interactive=True,
-            lines=4,
-            placeholder=(
-                "Exemple : Generate a 45-minute full body workout for a beginner, "
-                "3 times per week, with light dumbbells and focus on lower body."
-            ),
-        )
-
-        # Bouton "Générer" centré sous le prompt
+        # Bouton "Générer" centré
         with gr.Row():
-            gr.Column(scale=1)  # espace à gauche
+            gr.Column(scale=1)
             with gr.Column(scale=1):
                 generate_btn = gr.Button("Générer")
-            gr.Column(scale=1)  # espace à droite
+            gr.Column(scale=1)
 
         # Zone d’affichage du texte généré (programme)
         generated_text = gr.Textbox(
@@ -146,6 +142,38 @@ def render_dl_tab(
             label="Metrics",
         )
 
+        # --- Helpers internes ---
+
+        def _build_prompt(level_text: str, wf_text: str, wt_text: str, program_row):
+            """
+            Construit le prompt à partir du profil + programme sélectionné.
+            """
+            level = level_text or "Unknown"
+            wf = wf_text or "N/A"
+            wt = wt_text or "General fitness"
+
+            if not program_row:
+                # Aucun programme sélectionné encore
+                return (
+                    "Generate a workout program based on the user's physical level, "
+                    "workout type and training frequency. No specific exercise has "
+                    "been selected yet."
+                )
+
+            ex_name = program_row.get("exercise_name") or "the selected exercise"
+            target = program_row.get("target_muscles") or "the target muscles"
+            equip = program_row.get("equipment") or "bodyweight only"
+
+            # Prompt au format demandé
+            prompt = (
+                f"Generate a workout program at [{level}] level. "
+                f"I am currently training for [{wt}] and my training frequency is "
+                f"[{wf}] days per week. "
+                f"The exercise to generate is titled [{ex_name}], it targets "
+                f"the [{target}] and uses the following equipment: [{equip}]."
+            )
+            return prompt
+
         # --- Callbacks ---
 
         def _on_dl_model_select(name: str):
@@ -161,7 +189,7 @@ def render_dl_tab(
             outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
         )
 
-        # Synchronisation du profil + programme à l'ouverture du tab DL
+        # Synchronisation du profil + programme + prompt à l'ouverture du tab DL
         def _sync_profile(level_val, wf_val, wt_val, program_row):
             level_text = level_val or ""
             wf_text = "" if wf_val in (None, "") else str(wf_val)
@@ -170,15 +198,16 @@ def render_dl_tab(
             if not program_row:
                 program_df = pd.DataFrame()
             else:
-                # program_row est un dict {"exercise_name": ..., ...}
                 program_df = pd.DataFrame([program_row])
 
-            return level_text, wf_text, wt_text, program_df
+            prompt = _build_prompt(level_text, wf_text, wt_text, program_row)
+
+            return level_text, wf_text, wt_text, program_df, prompt
 
         tab_dl.select(
             _sync_profile,
             inputs=[level_out, wf_comp, wt_comp, selected_program_df],
-            outputs=[level_display, wf_display, wt_display, program_display],
+            outputs=[level_display, wf_display, wt_display, program_display, prompt_box],
         )
 
     # Retour des composants si besoin
