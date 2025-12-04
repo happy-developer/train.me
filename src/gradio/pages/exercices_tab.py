@@ -74,10 +74,17 @@ def render_list_of_exercices(
             value="All",
         )
 
+        # 🔽 Dropdown equipment — rempli dynamiquement
+        equipment_filter = gr.Dropdown(
+            label="Filter by equipment",
+            choices=["All"],
+            value="All",
+        )
+
         gr.Markdown(
             "The table below shows an overview of each exercise.\n\n"
-            "- Use your ML level to adapt difficulty\n"
-            "- Use the search box and muscle filter to refine\n"
+            "- ML level filters difficulty\n"
+            "- Use search, target muscles and equipment filters to refine\n"
             "- Select a program below to see full execution details\n"
         )
 
@@ -148,31 +155,48 @@ def render_list_of_exercices(
             level_text = level_val or ""
             filtered = _filter_by_level(df_view, level_text)
 
-            # muscles dynamiques selon niveau ML
+            # Muscles dynamiques selon niveau ML
             if "target_muscles" in filtered.columns:
                 muscles = sorted(set(filtered["target_muscles"].dropna()))
             else:
                 muscles = []
 
+            # Equipment dynamique selon niveau ML
+            if "equipment" in filtered.columns:
+                equipments = sorted(set(filtered["equipment"].dropna()))
+            else:
+                equipments = []
+
             return (
                 level_text,
                 filtered,
                 gr.update(choices=["All"] + muscles, value="All"),
+                gr.update(choices=["All"] + equipments, value="All"),
             )
 
         tab_ex.select(
             _sync_on_tab_open,
             inputs=[level_out],
-            outputs=[level_display, table, muscle_filter],
+            outputs=[level_display, table, muscle_filter, equipment_filter],
         )
 
-        # 2️⃣ Recherche texte + filtre muscle
-        def _search_table(query: str, level_val: str, muscle_choice: str):
+        # 2️⃣ Recherche texte + filtres muscle & equipment
+        def _search_table(
+            query: str,
+            level_val: str,
+            muscle_choice: str,
+            equipment_choice: str,
+        ):
+            # Filtre niveau ML
             base = _filter_by_level(df_view, level_val or "")
 
             # Filtre muscles
             if muscle_choice != "All" and "target_muscles" in base.columns:
                 base = base[base["target_muscles"] == muscle_choice]
+
+            # Filtre equipment
+            if equipment_choice != "All" and "equipment" in base.columns:
+                base = base[base["equipment"] == equipment_choice]
 
             # Recherche
             if query:
@@ -187,12 +211,18 @@ def render_list_of_exercices(
 
         search_box.change(
             _search_table,
-            inputs=[search_box, level_out, muscle_filter],
+            inputs=[search_box, level_out, muscle_filter, equipment_filter],
             outputs=table,
         )
 
         muscle_filter.change(
             _search_table,
-            inputs=[search_box, level_out, muscle_filter],
+            inputs=[search_box, level_out, muscle_filter, equipment_filter],
+            outputs=table,
+        )
+
+        equipment_filter.change(
+            _search_table,
+            inputs=[search_box, level_out, muscle_filter, equipment_filter],
             outputs=table,
         )
