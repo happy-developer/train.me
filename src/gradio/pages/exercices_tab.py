@@ -52,9 +52,7 @@ def render_list_of_exercices(
     with gr.Tab("List of programs") as tab_ex:
         gr.Markdown(f"## {app_desc_ex}")
 
-        # 🔹 Bloc d’affichage du niveau provenant du ML tab
-        gr.Markdown("### Your physical level (from Machine Learning tab)")
-
+        # Niveau ML
         with gr.Row():
             level_display = gr.Textbox(
                 label="Physical level",
@@ -63,20 +61,27 @@ def render_list_of_exercices(
                 max_lines=1,
             )
 
-        # 🔍 Barre de recherche sur tout le tableau
+        # 🔍 Recherche
         search_box = gr.Textbox(
             label="Search in table",
             placeholder="Name, muscles, equipment, difficulty, source…",
         )
 
+        # 🔽 Dropdown muscles — rempli dynamiquement
+        muscle_filter = gr.Dropdown(
+            label="Filter by target muscles",
+            choices=["All"],
+            value="All",
+        )
+
         gr.Markdown(
             "The table below shows an overview of each exercise.\n\n"
-            "- Click on the headers to sort\n"
-            "- Use the search box to filter rows\n"
+            "- Use your ML level to adapt difficulty\n"
+            "- Use the search box and muscle filter to refine\n"
             "- Select a program below to see full execution details\n"
         )
 
-        # --- Tableau compact ---
+        # --- Tableau ---
         table = gr.Dataframe(
             value=df_view,
             interactive=False,
@@ -138,36 +143,56 @@ def render_list_of_exercices(
 
         # ===== Callbacks =====
 
-        # 1) Synchronisation + filtrage niveau à l'ouverture de l'onglet
-        def _sync_on_tab_open(level_val: str) -> tuple:
+        # 1️⃣ Synchronisation + filtrage niveau à l'ouverture de l'onglet
+        def _sync_on_tab_open(level_val: str):
             level_text = level_val or ""
             filtered = _filter_by_level(df_view, level_text)
-            return level_text, filtered
+
+            # muscles dynamiques selon niveau ML
+            if "target_muscles" in filtered.columns:
+                muscles = sorted(set(filtered["target_muscles"].dropna()))
+            else:
+                muscles = []
+
+            return (
+                level_text,
+                filtered,
+                gr.update(choices=["All"] + muscles, value="All"),
+            )
 
         tab_ex.select(
             _sync_on_tab_open,
             inputs=[level_out],
-            outputs=[level_display, table],
+            outputs=[level_display, table, muscle_filter],
         )
 
-        # 2) Recherche texte sur le tableau (en tenant compte du niveau)
-        def _search_table(query: str, level_val: str) -> pd.DataFrame:
-            # On repart du tableau filtré par niveau
+        # 2️⃣ Recherche texte + filtre muscle
+        def _search_table(query: str, level_val: str, muscle_choice: str):
             base = _filter_by_level(df_view, level_val or "")
 
-            if not query:
-                return base
+            # Filtre muscles
+            if muscle_choice != "All" and "target_muscles" in base.columns:
+                base = base[base["target_muscles"] == muscle_choice]
 
-            # Recherche sur toutes les colonnes
-            df_str = base.astype(str)
-            mask = df_str.apply(
-                lambda row: row.str.contains(query, case=False, na=False).any(),
-                axis=1,
-            )
-            return base[mask]
+            # Recherche
+            if query:
+                df_str = base.astype(str)
+                mask = df_str.apply(
+                    lambda row: row.str.contains(query, case=False, na=False).any(),
+                    axis=1,
+                )
+                base = base[mask]
+
+            return base
 
         search_box.change(
             _search_table,
-            inputs=[search_box, level_out],
+            inputs=[search_box, level_out, muscle_filter],
+            outputs=table,
+        )
+
+        muscle_filter.change(
+            _search_table,
+            inputs=[search_box, level_out, muscle_filter],
             outputs=table,
         )
