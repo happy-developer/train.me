@@ -98,6 +98,14 @@ def render_ml_tab(
                     precision=2,
                 )
 
+                # 🔹 Nouveau champ texte interprétation du niveau
+                level_out = gr.Textbox(
+                    label="Physical level (text)",
+                    interactive=False,
+                    lines=1,
+                    max_lines=1,
+                )
+
                 meta_out = gr.Textbox(
                     label="Informations",
                     interactive=False,
@@ -119,21 +127,38 @@ def render_ml_tab(
             )
             df_examples_full = df_examples_full[ordered_cols]
 
-                # --- Exemples envoyés au modèle (uniquement les features d’entrée) ---
+        # --- Exemples envoyés au modèle (uniquement les features d’entrée) ---
         df_examples_for_gradio = df_examples_full[names]  # on garde seulement les features utiles
-
         rows = df_examples_for_gradio.values.tolist()
 
         gr.Examples(
             examples=rows,
             inputs=comps,
             label="Exemples (sélection rapide)"
-        )    
-
+        )
 
         gr.Markdown("---")
 
         # ====== Prédiction ======
+
+        def _interpret_level(y_val) -> str:
+            """Map numeric prediction to textual level."""
+            try:
+                if y_val is None:
+                    return ""
+                v = float(y_val)
+            except Exception:
+                return ""
+
+            if 0 <= v < 1:
+                return "Beginner"
+            elif 1 <= v < 2:
+                return "Intermediate"
+            elif 2 <= v < 2.5:
+                return "Advanced"
+            elif 2.5 <= v <= 3:
+                return "Expert"
+            return ""
 
         def _fn(*vals):
             payload = {k: v for k, v in zip(names, vals)}
@@ -187,11 +212,13 @@ def render_ml_tab(
                 bmi = None
                 fat_pct = None
 
-            # 3) Retourner les 4 sorties Gradio
-            return y_xp, bmi, fat_pct, meta
+            # 3) Interprétation textuelle du niveau
+            level_text = _interpret_level(y_xp)
 
-        btn.click(_fn, comps, [y_out, bmi_out, fat_out, meta_out])
+            # 4) Retourner les 5 sorties Gradio
+            return y_xp, level_text, bmi, fat_pct, meta
 
+        btn.click(_fn, comps, [y_out, level_out, bmi_out, fat_out, meta_out])
 
         gr.Markdown("---")
 
@@ -217,3 +244,5 @@ def render_ml_tab(
             row_count=(0, "dynamic"),
             col_count=df_mets.shape[1],
         )
+        # 👉 On renvoie le composant pour que les autres onglets puissent l'utiliser
+        return level_out
