@@ -34,7 +34,6 @@ def render_list_of_exercices(
             "target_muscles",
             "equipment",
             "difficulty",
-            "source_dataset",
         ]
 
         cols = [c for c in base_cols if c in df_view.columns]
@@ -61,20 +60,20 @@ def render_list_of_exercices(
                 max_lines=1,
             )
 
-        # 🔍 Recherche
+        # Recherche
         search_box = gr.Textbox(
             label="Search in table",
             placeholder="Name, muscles, equipment, difficulty, source…",
         )
 
-        # 🔽 Dropdown muscles — rempli dynamiquement
+        # Dropdown muscles — rempli dynamiquement
         muscle_filter = gr.Dropdown(
             label="Filter by target muscles",
             choices=["All"],
             value="All",
         )
 
-        # 🔽 Dropdown equipment — rempli dynamiquement
+        # Dropdown equipment — rempli dynamiquement
         equipment_filter = gr.Dropdown(
             label="Filter by equipment",
             choices=["All"],
@@ -150,7 +149,7 @@ def render_list_of_exercices(
 
         # ===== Callbacks =====
 
-        # 1️⃣ Synchronisation + filtrage niveau à l'ouverture de l'onglet
+        # Synchronisation + filtrage niveau à l'ouverture de l'onglet
         def _sync_on_tab_open(level_val: str):
             level_text = level_val or ""
             filtered = _filter_by_level(df_view, level_text)
@@ -180,7 +179,7 @@ def render_list_of_exercices(
             outputs=[level_display, table, muscle_filter, equipment_filter],
         )
 
-        # 2️⃣ Recherche texte + filtres muscle & equipment
+        # Recherche texte + filtres muscle & equipment
         def _search_table(
             query: str,
             level_val: str,

@@ -55,7 +55,7 @@ def build_app():
     with gr.Blocks(title=app_title) as demo:
         gr.Markdown(f"# {app_title}\n{app_desc_ml} / {app_desc_dl}")
         with gr.Tabs():
-            level_out = render_ml_tab(
+            level_out, wf_out, wt_out = render_ml_tab(
                 app_desc_ml=app_desc_ml,
                 feature_specs=FEATURES,
                 ui_feature_names=UI_FEATURE_NAMES,
@@ -73,8 +73,17 @@ def build_app():
                 report_path=REPORT_PATH,
                 on_load=demo.load,
             )
-            render_list_of_exercices(app_desc_ex=app_desc_ex, level_out=level_out)
-            render_dl_tab(app_desc_dl=app_desc_dl)
+            render_list_of_exercices(
+                app_desc_ex=app_desc_ex,
+                level_out=level_out,
+            )
+
+            render_dl_tab(
+                app_desc_dl=app_desc_dl,
+                level_out=level_out,
+                wf_comp=wf_out,
+                wt_comp=wt_out,
+            )
 
     return demo
 

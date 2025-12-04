@@ -38,8 +38,17 @@ def render_ml_tab(
                 gr.Markdown("### Assess your physical level")
                 comps, names = [], []
 
+                wf_comp = None  # Workout_Frequency (days/week)
+                wt_comp = None  # Workout_Type
+
                 for spec in feature_specs:
                     name = spec["name"]
+                    if name == "Experience_Level":
+                        comp = gr.Slider(0, 3, value=0, step=0, label=name, visible=False)
+
+                        comps.append(comp)
+                        names.append(name)
+                        continue
 
                     if name == "Gender":
                         # UI = Radio pour Male / Female
@@ -58,6 +67,7 @@ def render_ml_tab(
                             value=choices[0],
                             label="Workout_Type",
                         )
+                        wt_comp = comp  # on garde une référence
 
                     else:
                         vmin, vmax, default, step = get_bounds(spec, schema)
@@ -68,6 +78,9 @@ def render_ml_tab(
                             step=step,
                             label=name,
                         )
+
+                        if name == "Workout_Frequency (days/week)":
+                            wf_comp = comp  # on garde une référence
 
                     comps.append(comp)
                     names.append(name)
@@ -98,7 +111,7 @@ def render_ml_tab(
                     precision=2,
                 )
 
-                # 🔹 Nouveau champ texte interprétation du niveau
+                # Nouveau champ texte interprétation du niveau
                 level_out = gr.Textbox(
                     label="Physical level (text)",
                     interactive=False,
@@ -244,5 +257,5 @@ def render_ml_tab(
             row_count=(0, "dynamic"),
             col_count=df_mets.shape[1],
         )
-        # 👉 On renvoie le composant pour que les autres onglets puissent l'utiliser
-        return level_out
+        # On renvoie le composant pour que les autres onglets puissent l'utiliser
+        return level_out, wf_comp, wt_comp
