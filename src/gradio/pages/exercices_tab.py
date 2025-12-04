@@ -1,43 +1,19 @@
-import os
-from pathlib import Path
 from typing import Union
+from pathlib import Path
 
 import gradio as gr
 import pandas as pd
 
-
-# Le notebook s’exécute depuis son répertoire → on peut repartir du cwd
-current_dir = Path.cwd()
-json_path = current_dir / "src" / "gradio" / "data"
-
-# Chemin par défaut vers ton JSON fusionné
-DEFAULT_EXERCICES_PATH = Path(
-    os.getenv(
-        "DATASET_EXERCICES_FUSION",
-        json_path / "dataset_exercices_fusion_20251127_2004.json",
-    )
+from ..helpers.exercices_tab_utilis import (
+    DEFAULT_EXERCICES_PATH,
+    _filter_by_level,
+    _load_exercices,
 )
-
-def _sync_on_tab_open(level_val: str) -> str:
-    return level_val or ""
-
-def _load_exercices(path: Union[str, Path]) -> pd.DataFrame:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Dataset exercices introuvable : {path}")
-
-    df = pd.read_json(path)
-    df = df.reset_index(drop=True)
-    return df
-
-def _sync_level(level_val: str) -> str:
-    # Recopie la valeur du champ 'level_out' du ML tab
-    return level_val or ""
 
 
 def render_list_of_exercices(
     app_desc_ex: str,
-    level_out: gr.Textbox,  # 👈 nouveau param : textbox du ML tab
+    level_out: gr.Textbox,  # textbox du ML tab
     dataset_path: Union[str, Path] = DEFAULT_EXERCICES_PATH,
 ) -> None:
     """
@@ -45,7 +21,7 @@ def render_list_of_exercices(
     """
 
     df = _load_exercices(dataset_path)
-    _sync_level(level_out)
+
     # --- Vue "compacte" pour le tableau ---
     df_view = df.copy()
     if "execution" in df_view.columns:
@@ -65,13 +41,12 @@ def render_list_of_exercices(
         cols.append("Execution (preview)")
         df_view = df_view[cols]
 
-    columns = list(df_view.columns)
-
     # Liste pour le panneau de détails
     has_name_col = "exercise_name" in df.columns
     exercice_choices = (
         sorted(df["exercise_name"].dropna().unique().tolist())
-        if has_name_col else []
+        if has_name_col
+        else []
     )
 
     with gr.Tab("List of programs") as tab_ex:
@@ -88,9 +63,16 @@ def render_list_of_exercices(
                 max_lines=1,
             )
 
+        # 🔍 Barre de recherche sur tout le tableau
+        search_box = gr.Textbox(
+            label="Search in table",
+            placeholder="Name, muscles, equipment, difficulty, source…",
+        )
+
         gr.Markdown(
             "The table below shows an overview of each exercise.\n\n"
             "- Click on the headers to sort\n"
+            "- Use the search box to filter rows\n"
             "- Select a program below to see full execution details\n"
         )
 
@@ -153,9 +135,39 @@ def render_list_of_exercices(
                 inputs=exercice_selector,
                 outputs=details_md,
             )
-     
-            tab_ex.select(
-                _sync_on_tab_open,
-                inputs=[level_out],      # valeur provenant du ML tab
-                outputs=[level_display], # textbox affichée dans l’onglet Exercices
+
+        # ===== Callbacks =====
+
+        # 1) Synchronisation + filtrage niveau à l'ouverture de l'onglet
+        def _sync_on_tab_open(level_val: str) -> tuple:
+            level_text = level_val or ""
+            filtered = _filter_by_level(df_view, level_text)
+            return level_text, filtered
+
+        tab_ex.select(
+            _sync_on_tab_open,
+            inputs=[level_out],
+            outputs=[level_display, table],
+        )
+
+        # 2) Recherche texte sur le tableau (en tenant compte du niveau)
+        def _search_table(query: str, level_val: str) -> pd.DataFrame:
+            # On repart du tableau filtré par niveau
+            base = _filter_by_level(df_view, level_val or "")
+
+            if not query:
+                return base
+
+            # Recherche sur toutes les colonnes
+            df_str = base.astype(str)
+            mask = df_str.apply(
+                lambda row: row.str.contains(query, case=False, na=False).any(),
+                axis=1,
             )
+            return base[mask]
+
+        search_box.change(
+            _search_table,
+            inputs=[search_box, level_out],
+            outputs=table,
+        )
