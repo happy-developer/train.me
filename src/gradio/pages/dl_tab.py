@@ -14,6 +14,7 @@ def render_dl_tab(
     level_out: gr.Textbox,
     wf_comp: gr.Component,
     wt_comp: gr.Component,
+    selected_program_df: gr.State,  # en réalité: dict stocké dans un State
 ) -> dict:
     """Onglet Deep Learning (sélection du modèle + prompt + sortie texte)."""
 
@@ -42,6 +43,17 @@ def render_dl_tab(
                 max_lines=1,
             )
 
+        gr.Markdown("### Selected program (from List of programs)")
+
+        program_display = gr.Dataframe(
+            value=pd.DataFrame(),
+            interactive=False,
+            wrap=True,
+            label="Selected program",
+            row_count=(0, "dynamic"),
+            col_count=(0, "dynamic"),
+        )
+
         gr.Markdown(
             "These values are synchronized with your Machine Learning profile "
             "and can be used to guide the generated program."
@@ -64,7 +76,7 @@ def render_dl_tab(
             value="GPT2 Fine-tuning",
         )
 
-        # Zone d'info sur le modèle chargé (affiche le chemin, cache, etc.)
+        # Zone d'info sur le modèle chargé
         model_status = gr.Markdown(
             "No model loaded yet. Select one from the list above.",
         )
@@ -96,7 +108,7 @@ def render_dl_tab(
             max_lines=40,
         )
 
-        # Wiring : clic sur "Générer" → appelle le modèle sélectionné avec le prompt
+        # Wiring : clic sur "Générer"
         generate_btn.click(
             fn=generate_text_with_model,
             inputs=[model_selector, prompt_box],
@@ -143,27 +155,33 @@ def render_dl_tab(
             )
             return status, df_sum, df_model, df_training, df_metrics
 
-        # Quand on change de modèle, on charge via on_model_change()
         model_selector.change(
             fn=_on_dl_model_select,
             inputs=model_selector,
             outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
         )
 
-        # Synchronisation du profil à l'ouverture du tab DL
-        def _sync_profile(level_val, wf_val, wt_val):
+        # Synchronisation du profil + programme à l'ouverture du tab DL
+        def _sync_profile(level_val, wf_val, wt_val, program_row):
             level_text = level_val or ""
             wf_text = "" if wf_val in (None, "") else str(wf_val)
             wt_text = wt_val or ""
-            return level_text, wf_text, wt_text
+
+            if not program_row:
+                program_df = pd.DataFrame()
+            else:
+                # program_row est un dict {"exercise_name": ..., ...}
+                program_df = pd.DataFrame([program_row])
+
+            return level_text, wf_text, wt_text, program_df
 
         tab_dl.select(
             _sync_profile,
-            inputs=[level_out, wf_comp, wt_comp],
-            outputs=[level_display, wf_display, wt_display],
+            inputs=[level_out, wf_comp, wt_comp, selected_program_df],
+            outputs=[level_display, wf_display, wt_display, program_display],
         )
 
-    # Retour des composants si tu veux les réutiliser plus tard
+    # Retour des composants si besoin
     return {
         "model_selector": model_selector,
         "model_status": model_status,
@@ -172,4 +190,5 @@ def render_dl_tab(
         "level_display": level_display,
         "wf_display": wf_display,
         "wt_display": wt_display,
+        "program_display": program_display,
     }

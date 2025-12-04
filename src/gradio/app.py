@@ -73,7 +73,7 @@ def build_app():
                 report_path=REPORT_PATH,
                 on_load=demo.load,
             )
-            render_list_of_exercices(
+            selected_program_state = render_list_of_exercices(
                 app_desc_ex=app_desc_ex,
                 level_out=level_out,
             )
@@ -83,6 +83,7 @@ def build_app():
                 level_out=level_out,
                 wf_comp=wf_out,
                 wt_comp=wt_out,
+                selected_program_df=selected_program_state,  # en réalité: State
             )
 
     return demo

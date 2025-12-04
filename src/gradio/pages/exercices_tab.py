@@ -15,7 +15,7 @@ def render_list_of_exercices(
     app_desc_ex: str,
     level_out: gr.Textbox,  # textbox du ML tab
     dataset_path: Union[str, Path] = DEFAULT_EXERCICES_PATH,
-) -> None:
+):
     """
     Onglet 'Exercices proposés' : tableau + panneau de détails.
     """
@@ -40,6 +40,21 @@ def render_list_of_exercices(
         cols.append("Execution (preview)")
         df_view = df_view[cols]
 
+        # Colonnes à transférer vers le tab DL
+        selected_cols = [
+            c
+            for c in [
+                "exercise_name",
+                "target_muscles",
+                "equipment",
+                "difficulty",
+                "execution",
+            ]
+            if c in df.columns
+        ]
+    else:
+        selected_cols = []
+
     # Liste pour le panneau de détails
     has_name_col = "exercise_name" in df.columns
     exercice_choices = (
@@ -63,7 +78,7 @@ def render_list_of_exercices(
         # Recherche
         search_box = gr.Textbox(
             label="Search in table",
-            placeholder="Name, muscles, equipment, difficulty, source…",
+            placeholder="Name, muscles, equipment, difficulty…",
         )
 
         # Dropdown muscles — rempli dynamiquement
@@ -96,7 +111,9 @@ def render_list_of_exercices(
             col_count=(0, "dynamic"),
         )
 
-        # --- Panneau de détails ---
+        # --- Panneau de détails + sélection ---
+        selected_program_state = gr.State(value=None)  # 👈 pour le tab DL
+
         if has_name_col:
             gr.Markdown("### Program details")
 
@@ -111,13 +128,30 @@ def render_list_of_exercices(
                 value="Select a program to see full description.",
             )
 
-            def _format_details(ex_name: str) -> str:
+            # Tableau 1 ligne : programme sélectionné (affiché ici)
+            selected_program_df = gr.Dataframe(
+                value=pd.DataFrame(columns=selected_cols),
+                interactive=False,
+                wrap=True,
+                label="Selected program (for DL tab)",
+                row_count=(0, "dynamic"),
+                col_count=(0, "dynamic"),
+            )
+
+            def _format_details(ex_name: str):
+                # DF vide par défaut
+                empty_df = pd.DataFrame(columns=selected_cols)
+
                 if not ex_name:
-                    return "Select a program to see full description."
+                    return (
+                        "Select a program to see full description.",
+                        empty_df,
+                        None,
+                    )
 
                 subset = df[df["exercise_name"] == ex_name]
                 if subset.empty:
-                    return "No details found for this program."
+                    return "No details found for this program.", empty_df, None
 
                 row = subset.iloc[0]
 
@@ -129,7 +163,6 @@ def render_list_of_exercices(
                     f"**Target muscles** : {get('target_muscles')}",
                     f"**Equipment** : {get('equipment')}",
                     f"**Difficulty** : {get('difficulty')}",
-                    f"**Source dataset** : {get('source_dataset')}",
                     "",
                 ]
 
@@ -139,12 +172,21 @@ def render_list_of_exercices(
                     parts.append("")
                     parts.append(exec_text)
 
-                return "\n".join(parts)
+                details_text = "\n".join(parts)
+
+                # DF 1 ligne pour affichage
+                sel_row = {c: get(c, "") for c in selected_cols}
+                sel_df = pd.DataFrame([sel_row])
+
+                # Dict pour le tab DL
+                sel_dict = {c: get(c, "") for c in selected_cols}
+
+                return details_text, sel_df, sel_dict
 
             exercice_selector.change(
                 _format_details,
                 inputs=exercice_selector,
-                outputs=details_md,
+                outputs=[details_md, selected_program_df, selected_program_state],
             )
 
         # ===== Callbacks =====
@@ -225,3 +267,6 @@ def render_list_of_exercices(
             inputs=[search_box, level_out, muscle_filter, equipment_filter],
             outputs=table,
         )
+
+        # 👉 On retourne l'état (dict) du programme sélectionné
+        return selected_program_state
