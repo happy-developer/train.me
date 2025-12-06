@@ -167,11 +167,16 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
                 tokenizer=LOADED_TOKENIZERS[model_name],
                 max_new_tokens=256,
             )
-            return distilled_gpt2_gen.generate_text(
-                prompt=prompt,
-                temperature=0.8,   # un poil plus "sage" pour le student
-                top_p=0.9,
-                strip_prompt=True,
+            # return distilled_gpt2_gen.generate_text(
+            #     prompt=prompt,
+            #     temperature=0.8,   # un poil plus "sage" pour le student
+            #     top_p=0.9,
+            #     strip_prompt=True,
+            # )
+            return distilled_gpt2_gen.generer_exercice_interactif(               
+                workout_type="cardio",
+                debut="To increase your endurance, try to",
+                num_samples=2,
             )
 
     # ------------------------------------------------------------------

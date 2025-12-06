@@ -6,8 +6,10 @@ import pandas as pd
 
 from ..helpers.exercices_tab_utilis import (
     DEFAULT_EXERCICES_PATH,
+    DEFAULT_GOAL_PATH,
     _filter_by_level,
     _load_exercices,
+    _load_goals,
 )
 
 
@@ -15,6 +17,7 @@ def render_list_of_exercices(
     app_desc_ex: str,
     level_out: gr.Textbox,  # textbox du ML tab
     dataset_path: Union[str, Path] = DEFAULT_EXERCICES_PATH,
+    goal_path: Union[str, Path] = DEFAULT_GOAL_PATH,
 ):
     """
     Onglet 'Exercices proposés' : tableau + panneau de détails.
@@ -63,7 +66,30 @@ def render_list_of_exercices(
         else []
     )
 
+     # --- Chargement des goals ---
+    try:
+        goals = _load_goals(goal_path)
+    except Exception:
+        goals = []
+
+    if not goals:
+        goals = ["General Fitness"]
+
+    default_goal = "General Fitness" if "General Fitness" in goals else goals[0]
+
+
     with gr.Tab("List of programs") as tab_ex:
+        # Sélection du goal
+        gr.Markdown("## Select your goal")
+
+        goal_dropdown = gr.Dropdown(
+            label="List of goals",
+            choices=goals,
+            value=default_goal,
+            interactive=True,
+        )
+        goal_state = gr.State(value=None)
+
         gr.Markdown(f"## {app_desc_ex}")
 
         # Niveau ML
@@ -250,6 +276,15 @@ def render_list_of_exercices(
 
             return base
 
+        def _on_goal_change(goal_val):
+            return goal_val
+
+        goal_dropdown.change(
+            _on_goal_change,
+            inputs=goal_dropdown,
+            outputs=goal_state,
+        )
+
         search_box.change(
             _search_table,
             inputs=[search_box, level_out, muscle_filter, equipment_filter],
@@ -268,5 +303,6 @@ def render_list_of_exercices(
             outputs=table,
         )
 
-        # 👉 On retourne l'état (dict) du programme sélectionné
-        return selected_program_state
+        # On retourne l'état (dict) du programme sélectionné
+        return selected_program_state, goal_state
+

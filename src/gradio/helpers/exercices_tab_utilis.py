@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import os
 import pandas as pd
@@ -25,6 +26,38 @@ def _load_exercices(path: Union[str, Path]) -> pd.DataFrame:
     df = pd.read_json(path)
     df = df.reset_index(drop=True)
     return df
+
+
+DEFAULT_GOAL_PATH = Path(
+    os.getenv(
+        "GOAL_MAP_PATH",
+        json_path / "goal_map.json",
+    )
+)
+
+def _load_goals(path: Union[str, Path]) -> list[str]:
+    """
+    Charge la liste des goals depuis goal_map.json.
+    On suppose un JSON de type: ["General Fitness", "Strength", ...]
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Goal map introuvable : {path}")
+
+    with path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    if isinstance(data, list):
+        # On garde les chaînes, on nettoie le doublons, on trie
+        goals = [str(x) for x in data if x not in (None, "")]
+        return sorted(set(goals))
+
+    # fallback simple si jamais c’est un dict: on prend les clés
+    if isinstance(data, dict):
+        return sorted(map(str, data.keys()))
+
+    raise ValueError(f"Format inattendu pour goal_map.json : {type(data)}")
+
 
 def _sync_level(level_val: str) -> str:
     # Recopie la valeur du champ 'level_out' du ML tab
