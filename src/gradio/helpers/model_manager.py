@@ -190,52 +190,54 @@ def get_dl_model_report_components(model_name: str):
         return _empty_dl_dfs()
 
     report_path = info.get("report_path")
+    print(report_path)
     if not report_path or not report_path.exists():
         return _empty_dl_dfs()
 
     try:
         data = json.loads(report_path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as e:
+        print(f"[DL REPORT] Error while reading {report_path}: {e}")
         return _empty_dl_dfs()
 
-    # Summary
-    summary_keys = [
-        "created_at",
-        "task",
-        "target",
-        "n_train_samples",
-        "n_val_samples",
-        "vocab_size",
-        "sequence_length",
-        "device",
-    ]
-    df_summary = pd.DataFrame(
-        [(k, data.get(k, "")) for k in summary_keys],
-        columns=["Key", "Value"],
-    )
+    # ===== Summary =====
+    dataset = data.get("dataset", {})
 
-    # Model config
-    model_cfg = data.get("model", {})
+    summary_rows = [
+        ("created_at",        data.get("created_at", "")),
+        ("task",              data.get("task", "")),
+        ("target",            data.get("target", "")),
+        ("framework",         data.get("framework", "")),
+        ("dataset.file",      dataset.get("file", "")),
+        ("dataset.size_bytes", dataset.get("size_bytes", "")),
+        ("dataset.tokens",    dataset.get("tokens", "")),
+    ]
+
+    df_summary = pd.DataFrame(summary_rows, columns=["Key", "Value"])
+
+    # ===== Model config =====
+    model_cfg = data.get("model", {}) or {}
     df_model = pd.DataFrame(
         [(k, v) for k, v in model_cfg.items()],
         columns=["Key", "Value"],
     )
 
-    # Training
-    training_cfg = data.get("training", {})
+    # ===== Training =====
+    training_cfg = data.get("training", {}) or {}
     df_training = pd.DataFrame(
         [(k, v) for k, v in training_cfg.items()],
         columns=["Key", "Value"],
     )
 
-    # Metrics
-    metrics_cfg = data.get("metrics", {})
+    # ===== Metrics =====
+    metrics_cfg = data.get("metrics", {}) or {}
     df_metrics = pd.DataFrame(
         [(k, v) for k, v in metrics_cfg.items()],
         columns=["Metric", "Value"],
     )
 
     return df_summary, df_model, df_training, df_metrics
+
 
 
 def _empty_dl_dfs():

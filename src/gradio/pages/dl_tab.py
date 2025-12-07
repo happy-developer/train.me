@@ -14,8 +14,8 @@ def render_dl_tab(
     level_out: gr.Textbox,
     wf_comp: gr.Component,
     wt_comp: gr.Component,
-    selected_program_df: gr.State, 
-    goal_state: gr.State
+    selected_program_df: gr.State,
+    goal_state: gr.State,
 ) -> dict:
     """Onglet Deep Learning (sélection du modèle + prompt + sortie texte)."""
 
@@ -47,12 +47,11 @@ def render_dl_tab(
         gr.Markdown("### Selected program (from List of programs)")
 
         goal_display = gr.Textbox(
-                label="Training goal",
-                interactive=False,
-                lines=1,
-                max_lines=1,
-            )
-
+            label="Training goal",
+            interactive=False,
+            lines=1,
+            max_lines=1,
+        )
 
         program_display = gr.Dataframe(
             value=pd.DataFrame(),
@@ -73,7 +72,7 @@ def render_dl_tab(
             "Prediction based on your information and the program selected from the list"
         )
 
-        # Champ Prompt (auto-généré, non éditable)
+        # Champ Prompt (auto-généré)
         prompt_box = gr.Textbox(
             label="Prompt sent to the Deep Learning model",
             interactive=True,
@@ -150,7 +149,13 @@ def render_dl_tab(
 
         # --- Helpers internes ---
 
-        def _build_prompt(level_text: str, wf_text: str, wt_text: str, program_row, goal_text: str,):
+        def _build_prompt(
+            level_text: str,
+            wf_text: str,
+            wt_text: str,
+            program_row,
+            goal_text: str,
+        ) -> str:
             """
             Construit le prompt à partir du profil + programme sélectionné.
             """
@@ -160,20 +165,23 @@ def render_dl_tab(
             goal = goal_text or "Olympic Weightlifting"
 
             if not program_row:
-                # Aucun programme sélectionné encore
                 return (
-                    "Generate a workout program based on the user's physical level, "
-                    "and your goal. No specific exercise has "
-                    "been selected yet."
+                    "Generate a workout program based on the user's physical level "
+                    "and training goal. No specific exercise has been selected yet."
                 )
 
             ex_name = program_row.get("exercise_name") or "the selected exercise"
             target = program_row.get("target_muscles") or "the target muscles"
             equip = program_row.get("equipment") or "bodyweight only"
 
-            # Prompt au format demandé
             prompt = (
-                f"{level} level ({goal})\n\n"
+                f"Generate a workout program at [{level}] level. "
+                f"I am currently training for [{wt}] and my training frequency "
+                f"is [{wf}] days per week. "
+                f"My main goal is [{goal}]. "
+                f"The exercise to generate is titled [{ex_name}], "
+                f"it targets the [{target}] and uses the following equipment: "
+                f"[{equip}]."
             )
             return prompt
 
@@ -186,14 +194,15 @@ def render_dl_tab(
             )
             return status, df_sum, df_model, df_training, df_metrics
 
+        # Quand on change de modèle manuellement
         model_selector.change(
             fn=_on_dl_model_select,
             inputs=model_selector,
             outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
         )
 
-        # Synchronisation du profil + programme + prompt à l'ouverture du tab DL
-        def _sync_profile(level_val, wf_val, wt_val, program_row, goal_val):
+        # Synchronisation du profil + programme + prompt + rapport à l'ouverture du tab DL
+        def _sync_profile(level_val, wf_val, wt_val, program_row, goal_val, model_name):
             level_text = level_val or ""
             wf_text = "" if wf_val in (None, "") else str(wf_val)
             wt_text = wt_val or ""
@@ -206,6 +215,12 @@ def render_dl_tab(
 
             prompt = _build_prompt(level_text, wf_text, wt_text, program_row, goal_text)
 
+            # Chargement du modèle + rapport dès ouverture du tab
+            status = on_model_change(model_name)
+            df_sum, df_model, df_training, df_metrics = get_dl_model_report_components(
+                model_name
+            )
+
             return (
                 level_text,
                 wf_text,
@@ -213,12 +228,36 @@ def render_dl_tab(
                 goal_text,
                 program_df,
                 prompt,
+                status,
+                df_sum,
+                df_model,
+                df_training,
+                df_metrics,
             )
 
         tab_dl.select(
             _sync_profile,
-            inputs=[level_out, wf_comp, wt_comp,  selected_program_df, goal_state],
-            outputs=[level_display, wf_display, wt_display, goal_display, program_display, prompt_box],
+            inputs=[
+                level_out,
+                wf_comp,
+                wt_comp,
+                selected_program_df,
+                goal_state,
+                model_selector,
+            ],
+            outputs=[
+                level_display,
+                wf_display,
+                wt_display,
+                goal_display,
+                program_display,
+                prompt_box,
+                model_status,
+                dl_sum,
+                dl_model,
+                dl_training,
+                dl_metrics,
+            ],
         )
 
     # Retour des composants si besoin
@@ -232,4 +271,8 @@ def render_dl_tab(
         "wt_display": wt_display,
         "goal_display": goal_display,
         "program_display": program_display,
+        "dl_sum": dl_sum,
+        "dl_model": dl_model,
+        "dl_training": dl_training,
+        "dl_metrics": dl_metrics,
     }
