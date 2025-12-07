@@ -1,18 +1,15 @@
 from pathlib import Path
 import pandas as pd
 import json
-import re
-import numpy as np
-import tensorflow as tf
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import gpt_2_simple as gpt2
+import tensorflow.compat.v1 as tf
+
+tf.disable_v2_behavior()
 
 from ..generators.gpt2_distillation_text_generator import GPT2_DistilledTextGenerator
 from ..generators.gpt2_fine_tuning_text_generator import GPT2_FineTuningTextGenerator
 from ..generators.transformer_text_generator import TransformerTextGenerator
-from ..generators.lstm_text_generator import LSTMTextGenerator  # en haut du fichier si pas déjà fait
-
-from .custom_layers import MultiHeadSelfAttention, PositionalEmbedding, TransformerBlock
+from ..generators.lstm_text_generator import LSTMTextGenerator
 
 # ---------------------------------------------------------------------
 # Définition des chemins principaux
@@ -26,26 +23,11 @@ MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 # ---------------------------------------------------------------------
 
 MODEL_REGISTRY = {
-    "LSTM": {
-        "type": "pt",
-        "path": MODEL_DIR / "lstm_v3.pt",
-        "report_path": MODEL_DIR / "LSTM_model_report.json",
-    },
-    "Transformer": {
-        "type": "pt",
-        "path": MODEL_DIR / "transformer_v2.pt",
-        "report_path": MODEL_DIR / "Transformer_model_report.json",
-    },
-    "GPT2 Fine-tuning": {
-        "type": "gpt2",
-        "path": MODEL_DIR / "gpt2_trainme_fine_tuning_gpt2_v3",
-        "report_path": MODEL_DIR / "GPT2_Fine_Tuning_model_report.json",
-    },
-    "GPT2 Distillation": {
+    "xMas - GPT2 Fine-tuning": {
         "type": "gpt2",
         # "path": MODEL_DIR / "gpt2_trainme_distillation_gpt2_v5",
-        "path": MODEL_DIR / "gpt2-medium_trainme_distillation_gpt2_v6",
-        "report_path": MODEL_DIR / "GPT2_Distillation_model_report.json",
+        "path": MODEL_DIR / "gpt2-xmas-finetuning_run3",
+        "report_path": MODEL_DIR / "GPT2_Fine_Tuning_model_report_gpt_2_simple.json",
     },
 }
 
@@ -65,124 +47,132 @@ def on_model_change(model_name: str) -> str:
 
     info = MODEL_REGISTRY[model_name]
     model_path = info["path"]
+    if isinstance(model_path, str):
+        model_path = Path(model_path)
+
+    checkpoint_dir = str(model_path.parent)
+    run_name = model_path.name
 
     # Déjà chargé ? On renvoie direct.
     if model_name in LOADED_MODELS:
         return f"Model loaded from cache: {model_path}"
 
-    model_path_str = str(model_path)
+    tf.reset_default_graph()
+    sess = gpt2.start_tf_sess()
+    gpt2.load_gpt2(
+        sess,
+        checkpoint_dir=checkpoint_dir,
+        run_name=run_name,
+    )
 
-    if info["type"] == "pt":
-        # ------------------------------------------------------------------
-        # 1) Modèles PyTorch (.pt) : LSTM / Transformer v2
-        # ------------------------------------------------------------------
-        if model_path_str.endswith(".pt"):
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            model = torch.load(model_path, map_location=device)
-
-            # On passe en mode eval si possible
-            if hasattr(model, "eval"):
-                model.eval()
-
-            LOADED_MODELS[model_name] = model
-
-    elif info["type"] == "gpt2":
-        model = AutoModelForCausalLM.from_pretrained(model_path)
-        LOADED_MODELS[model_name] = model
-
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        LOADED_TOKENIZERS[model_name] = tokenizer
-
-    else:
-        raise ValueError(f"Unsupported model type: {info['type']}")
+    # On pourrait stocker la session si besoin plus tard
+    LOADED_MODELS[model_name] = {
+        "sess": sess,
+        "checkpoint_dir": checkpoint_dir,
+        "run_name": run_name,
+    }
 
     return f"Model loaded: {model_path}"
 
 
+def clean_special_tokens(text: str) -> str:
+    return (
+        text.replace("<|startoftext|>", "")
+        .replace("<|endoftext|>", "")
+        .strip()
+    )
+
+
+def cut_to_last_sentence(text: str, min_chars: int = 60) -> str:
+    """
+    Coupe le texte au dernier '.', '!' ou '?' pour éviter
+    les phrases tronquées. min_chars évite de couper trop tôt.
+    """
+    last_dot = text.rfind(".")
+    last_exc = text.rfind("!")
+    last_q = text.rfind("?")
+    end_idx = max(last_dot, last_exc, last_q)
+
+    if end_idx != -1 and end_idx >= min_chars:
+        return text[: end_idx + 1].strip()
+    return text.strip()
+
+
+def generate_clean_program(
+    sess,
+    prompt: str,
+    max_length: int = 200,
+    temperature: float = 0.8,
+    checkpoint_dir: str | None = None,
+    run_name: str | None = None,
+) -> str:
+    """
+    Génère un texte brut avec gpt_2_simple en forçant checkpoint_dir / run_name,
+    puis applique le nettoyage spécifique TrAIn.me.
+    """
+    gen_kwargs = dict(
+        sess=sess,
+        prefix=prompt,
+        length=max_length,
+        temperature=temperature,
+        top_k=40,
+        nsamples=1,
+        batch_size=1,
+        return_as_list=True,
+        truncate="<|endoftext|>",  # s'arrête si le token apparaît
+    )
+
+    # IMPORTANT : on force les chemins si fournis
+    if checkpoint_dir is not None:
+        gen_kwargs["checkpoint_dir"] = checkpoint_dir
+    if run_name is not None:
+        gen_kwargs["run_name"] = run_name
+
+    raw_list = gpt2.generate(**gen_kwargs)
+    raw = raw_list[0] if isinstance(raw_list, list) else raw_list
+
+    txt = clean_special_tokens(raw)
+    txt = cut_to_last_sentence(txt)
+    return txt
+
+
 def generate_text_with_model(model_name: str, prompt: str) -> str:
     """Génère du texte avec le modèle sélectionné à partir du prompt."""
+    print(prompt)
     prompt = prompt.strip()
     if not prompt:
         return "Please enter a prompt before generating."
 
     info = MODEL_REGISTRY[model_name]
+    model_path = info["path"]  # Path vers le dossier qui contient encoder.json / model-xxx
+    if isinstance(model_path, str):
+        model_path = Path(model_path)
 
-    # ------------------------------------------------------------------
-    # 1) Modèles Keras : LSTM & Transformer
-    # ------------------------------------------------------------------
-    if info["type"] == "pt":
-        if model_name not in LOADED_MODELS:
-            on_model_change(model_name)
+    checkpoint_dir = str(model_path.parent)   # ex: .../src/models/v1
+    run_name = model_path.name                # ex: "gpt2-xmas-finetuning_run3"
 
-        # ------------------------------------------------------------------
-        # 1) LSTM  (PyTorch ou Keras, peu importe pour le wrapper)
-        # ------------------------------------------------------------------
-        if model_name == "LSTM":
-            lstm_gen = LSTMTextGenerator.get_instance(LOADED_MODELS[model_name])
-            return lstm_gen.generate_text(
-                seed_text=prompt,
-                num_words=80,
-                temperature=0.8,
-            )
+    print(f"[GPT-2] Using checkpoint_dir={checkpoint_dir} run_name={run_name}")
 
-        # ------------------------------------------------------------------
-        # 2) Transformer (idem, backend abstrait par le wrapper)
-        # ------------------------------------------------------------------
-        if model_name == "Transformer":
-            transformer_gen = TransformerTextGenerator.get_instance(
-                LOADED_MODELS[model_name]  # state_dict OU nn.Module
-            )
-            return transformer_gen.generate_text(
-                seed_text=prompt,
-                num_words=80,
-                temperature=0.9,
-            )
+    # Reset du graphe TF + session
+    tf.reset_default_graph()
+    sess = gpt2.start_tf_sess()
 
-        return f"Text generation is not implemented yet for Keras model '{model_name}'."
+    # On indique explicitement où est le modèle
+    gpt2.load_gpt2(
+        sess,
+        checkpoint_dir=checkpoint_dir,
+        run_name=run_name,
+    )
 
-    # ------------------------------------------------------------------
-    # 2) GPT-2 Fine-tuning uniquement
-    # ------------------------------------------------------------------
-    if info["type"] == "gpt2":
-        if model_name not in LOADED_MODELS:
-            on_model_change(model_name)
-
-        if model_name == "GPT2 Fine-tuning":
-            fine_tuned_gpt2_gen = GPT2_FineTuningTextGenerator(
-                model=LOADED_MODELS[model_name],
-                tokenizer=LOADED_TOKENIZERS[model_name],
-                max_new_tokens=256,
-            )
-
-            return fine_tuned_gpt2_gen.generate_text(
-                prompt=prompt,
-                temperature=0.9,   # réglage recommandé dans ton notebook
-                top_p=0.95,
-                strip_prompt=True,
-            )
-        
-        if model_name == "GPT2 Distillation":
-            distilled_gpt2_gen = GPT2_DistilledTextGenerator(
-                model=LOADED_MODELS[model_name],
-                tokenizer=LOADED_TOKENIZERS[model_name],
-                max_new_tokens=256,
-            )
-            # return distilled_gpt2_gen.generate_text(
-            #     prompt=prompt,
-            #     temperature=0.8,   # un poil plus "sage" pour le student
-            #     top_p=0.9,
-            #     strip_prompt=True,
-            # )
-            return distilled_gpt2_gen.generer_exercice_interactif(               
-                workout_type="cardio",
-                debut="To increase your endurance, try to",
-                num_samples=2,
-            )
-
-    # ------------------------------------------------------------------
-    # 3) Type non géré
-    # ------------------------------------------------------------------
-    return f"Text generation is not implemented yet for model '{model_name}'."
+    text = generate_clean_program(
+        sess,
+        prompt=prompt,
+        max_length=220,
+        temperature=0.7,
+        checkpoint_dir=checkpoint_dir,
+        run_name=run_name,
+    )
+    return text
 
 
 def get_dl_model_report_components(model_name: str):
@@ -221,28 +211,28 @@ def get_dl_model_report_components(model_name: str):
     ]
     df_summary = pd.DataFrame(
         [(k, data.get(k, "")) for k in summary_keys],
-        columns=["Key", "Value"]
+        columns=["Key", "Value"],
     )
 
     # Model config
     model_cfg = data.get("model", {})
     df_model = pd.DataFrame(
         [(k, v) for k, v in model_cfg.items()],
-        columns=["Key", "Value"]
+        columns=["Key", "Value"],
     )
 
     # Training
     training_cfg = data.get("training", {})
     df_training = pd.DataFrame(
         [(k, v) for k, v in training_cfg.items()],
-        columns=["Key", "Value"]
+        columns=["Key", "Value"],
     )
 
     # Metrics
     metrics_cfg = data.get("metrics", {})
     df_metrics = pd.DataFrame(
         [(k, v) for k, v in metrics_cfg.items()],
-        columns=["Metric", "Value"]
+        columns=["Metric", "Value"],
     )
 
     return df_summary, df_model, df_training, df_metrics

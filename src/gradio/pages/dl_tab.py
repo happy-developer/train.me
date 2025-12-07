@@ -84,12 +84,9 @@ def render_dl_tab(
         model_selector = gr.Dropdown(
             label="Deep Learning model",
             choices=[
-                "LSTM",
-                "Transformer",
-                "GPT2 Fine-tuning",
-                "GPT2 Distillation",
+                "xMas - GPT2 Fine-tuning",
             ],
-            value="GPT2 Fine-tuning",
+            value="xMas - GPT2 Fine-tuning",
         )
 
         # Zone d'info sur le modèle chargé
@@ -159,8 +156,8 @@ def render_dl_tab(
             """
             level = level_text or "Unknown"
             wf = wf_text or "N/A"
-            wt = wt_text or "General fitness"
-            goal = goal_text or "General Fitness"
+            wt = wt_text or "Olympic Weightlifting"
+            goal = goal_text or "Olympic Weightlifting"
 
             if not program_row:
                 # Aucun programme sélectionné encore
@@ -176,10 +173,7 @@ def render_dl_tab(
 
             # Prompt au format demandé
             prompt = (
-                f"Generate a workout program at [{level}] level. "
-                f"The exercise to generate is titled [{ex_name}], "
-                f"and the main training goal is [{goal}]. "
-                f"Structure the session so it clearly matches a [{goal}] objective."
+                f"{level} level ({goal})\n\n"
             )
             return prompt
 
@@ -203,7 +197,7 @@ def render_dl_tab(
             level_text = level_val or ""
             wf_text = "" if wf_val in (None, "") else str(wf_val)
             wt_text = wt_val or ""
-            goal_text = goal_val or "General Fitness"
+            goal_text = goal_val or "Olympic Weightlifting"
 
             if not program_row:
                 program_df = pd.DataFrame()

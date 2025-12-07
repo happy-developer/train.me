@@ -1,12 +1,12 @@
 import textwrap
 import torch
-
+import re
 
 class GPT2_DistilledTextGenerator:
     """
-    Wrapper simple pour le modèle GPT-2 distillé de TrAIn.me.
+    Wrapper pour le modèle GPT-2 distillé de TrAIn.me.
     Gère :
-    - la génération auto-régressive
+    - génération auto-régressive
     - temperature / top_p
     - max_new_tokens
     """
@@ -20,6 +20,9 @@ class GPT2_DistilledTextGenerator:
         self.model.to(self.device)
         self.model.eval()
 
+    # ------------------------------------------------------------------
+    # Génération simple
+    # ------------------------------------------------------------------
     def generate_text(
         self,
         prompt: str,
@@ -27,7 +30,7 @@ class GPT2_DistilledTextGenerator:
         top_p: float = 0.9,
         strip_prompt: bool = True,
     ) -> str:
-        """Génère du texte à partir du prompt."""
+
         prompt = prompt.strip()
         if not prompt:
             return "Please enter a prompt before generating."
@@ -52,7 +55,9 @@ class GPT2_DistilledTextGenerator:
 
         return text
 
-
+    # ------------------------------------------------------------------
+    # Ancienne fonction interactive (simple)
+    # ------------------------------------------------------------------
     def generer_exercice_interactif(
         self,
         workout_type: str = "strength",
@@ -61,21 +66,8 @@ class GPT2_DistilledTextGenerator:
         max_length: int = 120,
         temperature: float = 1.0,
     ):
-        """
-        Génère plusieurs descriptions / consignes d’entraînement
-        avec le modèle Student distillé (GPT-2 compact spécialisé TrAIn.me).
-
-        Args:
-            model : modèle HuggingFace (AutoModelForCausalLM)
-            tokenizer : tokenizer associé (teacher_tokenizer recommandé)
-            workout_type : catégorie (strength, cardio, mobility, core…)
-            debut : début de phrase fourni par l'utilisateur
-            num_samples : nombre d’exemples à générer
-            max_length : longueur maximale en tokens
-            temperature : contrôle la créativité (>1 = plus créatif)
-        """
         device = torch.device("cpu")
-        # Construction du prompt
+
         if debut:
             prompt = f"Workout [{workout_type}]: {debut}"
         else:
@@ -103,19 +95,133 @@ class GPT2_DistilledTextGenerator:
                     pad_token_id=self.tokenizer.eos_token_id,
                 )
 
-            # Décodage
             generated_text = self.tokenizer.decode(
                 output_ids[0],
                 skip_special_tokens=True
             )
 
-            # print(f"\n> Exemple #{i+1} :")
-            return(
+            return textwrap.fill(
+                generated_text,
+                width=75,
+                initial_indent="   ",
+                subsequent_indent="   ",
+            )
+
+
+    # ------------------------------------------------------------------
+    # Filtre amélioré
+    # ------------------------------------------------------------------
+    def generate_with_filter(
+        self,
+        model,
+        tokenizer,
+        prompt: str,
+        goal: str,
+        n_candidates: int = 3,
+        max_new_tokens: int = 160,
+        temperature: float = 0.7,
+        top_k: int = 40,
+        top_p: float = 0.9,
+        max_attempts: int = 3,
+    ):
+        device = torch.device("cpu")
+        model.to(device)
+        model.eval()
+
+        self.model.to(device)
+        self.model.eval()
+
+        for i in range(1):
+            inputs = self.tokenizer(prompt, return_tensors="pt").to(device)
+
+            with torch.no_grad():
+                output_ids = self.model.generate(
+                    **inputs,
+                    max_length=160,
+                    do_sample=True,
+                    temperature=temperature,
+                    top_k=50,
+                    top_p=0.95,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                )
+
+            generated_text = self.tokenizer.decode(
+                output_ids[0],
+                skip_special_tokens=True
+            )
+
+            return textwrap.fill(
+                generated_text,
+                width=75,
+                initial_indent="   ",
+                subsequent_indent="   ",
+            )
+
+    # ------------------------------------------------------------------
+    # Version V2 pour l'IHM
+    # ------------------------------------------------------------------
+
+
+
+    def generer_exercice_interactif_V2(
+        self,
+        level: str,
+        goal: str,
+        num_samples: int = 3,
+        max_length: int = 150,
+        temperature: float = 1.0,
+        candidates_per_sample: int = 3,
+    ):
+
+        prompt = f"{level} level ({goal})\n\n"
+
+        texts = []
+
+        for i in range(num_samples):
+            # ⬇️ ICI : appel via self, plus via la classe
+            generated_text = self.generate_with_filter(
+                model=self.model,
+                tokenizer=self.tokenizer,
+                prompt=prompt,
+                goal=goal,
+                n_candidates=candidates_per_sample,
+                max_new_tokens=160,
+                temperature=0.7,
+                top_k=40,
+                top_p=0.9,
+            )
+
+
+            
+             # Suppression des artefacts de liste Python
+            cleaned = generated_text.replace("['", "")
+            cleaned = cleaned.replace("']", "")
+            cleaned = cleaned.replace('", "', ' ')  # parfois utilisé dans les listes
+
+            # Supprimer les retours à la ligne trop nombreux
+            cleaned = cleaned.replace("\n", " ")
+
+            # Retirer le prompt si le modèle l'a recopié
+            prompt_strip = prompt.strip()
+            if prompt_strip and cleaned.startswith(prompt_strip):
+                cleaned = cleaned[len(prompt_strip):].lstrip()
+
+            # Suppression des doubles espaces
+            cleaned = re.sub(r"\s{2,}", " ", cleaned)
+
+            # Trim final
+            cleaned = cleaned.strip()
+
+
+            texts.append(
                 textwrap.fill(
-                    generated_text,
+                    cleaned,
                     width=75,
                     initial_indent="   ",
                     subsequent_indent="   ",
                 )
             )
-            # print("-" * 80)
+
+        return texts
+
