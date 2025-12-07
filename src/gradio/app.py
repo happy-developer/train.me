@@ -3,7 +3,6 @@ import gradio as gr
 import pandas as pd
 import os
 
-
 # ---------- Paths ----------
 from .config import build_paths, UI_EXAMPLES
 
@@ -22,11 +21,12 @@ LOGS_DIR    = p["LOGS_DIR"]; LOGS_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH     = p["DB_PATH"]
 REPORT_PATH = p["REPORT_PATH"]
 
-
 # ---------- Load model & schema ----------
 from .model_loader import load_model_and_schema, load_optional_joblib
 
-model, schema, TARGET_NAME, FEATURES, INTERNAL_EXPECTED = load_model_and_schema(MODEL_PATH, SCHEMA_PATH)
+model, schema, TARGET_NAME, FEATURES, INTERNAL_EXPECTED = load_model_and_schema(
+    MODEL_PATH, SCHEMA_PATH
+)
 fx_scaler = load_optional_joblib(FEATURE_SCALER_PATH)
 y_scaler  = load_optional_joblib(TARGET_SCALER_PATH)
 encoder   = load_optional_joblib(ENCODER_PATH)
@@ -39,22 +39,24 @@ from .helpers.schema_utils import get_bounds
 from .helpers.report_utils import read_model_report, report_summary_df, report_metrics_df
 from .helpers.sqlite_utils import load_val_subset
 
-
 # ---------- UI ----------
 def build_app():
-    app_title = f"TrAIn.me — (v4.5-minimal)"
-    app_desc_ml = f"Personalize your experience"
+    app_title   = f"TrAIn.me — (v4.5-minimal)"
+    app_desc_ml = "Personalize your experience"
     app_desc_ex = "Choose your training program"
     app_desc_dl = "Generate your personalized exercise"
+    app_desc_dl_exec = "Execution generator"
 
     from .pages.ml_tab import render_ml_tab
     from .pages.exercices_tab import render_list_of_exercices
     from .pages.dl_tab import render_dl_tab
+    from .pages.dl_execution_tab import render_dl_execution_tab  # 👈 nouveau renderer
     from .config import UI_EXAMPLES
 
     with gr.Blocks(title=app_title) as demo:
         gr.Markdown(f"# {app_title}\n{app_desc_ml} / {app_desc_dl}")
         with gr.Tabs():
+            # Onglet 1 : ML
             level_out, wf_out, wt_out = render_ml_tab(
                 app_desc_ml=app_desc_ml,
                 feature_specs=FEATURES,
@@ -73,12 +75,14 @@ def build_app():
                 report_path=REPORT_PATH,
                 on_load=demo.load,
             )
+
+            # Onglet 2 : liste des programmes
             selected_program_state, goal_state = render_list_of_exercices(
                 app_desc_ex=app_desc_ex,
                 level_out=level_out,
             )
 
-
+            # Onglet 3 : DL – programme complet
             render_dl_tab(
                 app_desc_dl=app_desc_dl,
                 level_out=level_out,
@@ -88,11 +92,13 @@ def build_app():
                 goal_state=goal_state,
             )
 
+            # Onglet 4 : DL – Execution generator
+            render_dl_execution_tab(
+                app_desc_dl_exec=app_desc_dl_exec
+            )
+
     return demo
 
 
 if __name__ == "__main__":
     build_app().launch(server_name="0.0.0.0", server_port=int(os.getenv("PORT", 7860)))
-
-
-
