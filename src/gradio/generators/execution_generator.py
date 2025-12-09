@@ -15,8 +15,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 
 # Dossier de ton modèle finetuné d'exécution
-# EXEC_MODEL_DIR = MODEL_DIR / "transformer_execution_generator_v2"
-EXEC_MODEL_DIR = MODEL_DIR / "transformer_execution_generator_v3"
+# EXEC_MODEL_DIR = MODEL_DIR / "transformer_execution_generator_v3"
+# Chargement du modèle HF (tokenizer + modèle)
+MODEL_REPO = "AIppyDev/transformer_execution_generator_v3"
+MODEL_SUBFOLDER = "transformer_execution_generator_v3"  # le nom du dossier dans le repo
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -195,13 +197,14 @@ def _load_exec_model():
     Charge une seule fois tokenizer + modèle pour l'execution generator.
     Utilise un cache pour éviter les rechargements coûteux.
     """
-    model_path = str(EXEC_MODEL_DIR)
 
-    tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side="left")
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-
-    model = AutoModelForCausalLM.from_pretrained(model_path)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO,
+            subfolder=MODEL_SUBFOLDER,)
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_REPO,
+            subfolder=MODEL_SUBFOLDER,
+        torch_dtype=torch.float32,   # CPU friendly
+    )
     model.to(DEVICE)
     model.eval()
 

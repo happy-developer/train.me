@@ -10,7 +10,7 @@ from ..helpers.exercices_tab_utilis import (
 )
 from ..generators.execution_generator import (
     build_execution_prompt,
-    generate_execution_text,   # 👈 nouveau
+    generate_execution_text,
 )
 
 
@@ -44,7 +44,7 @@ def render_dl_execution_tab(
     selected_cols = [c for c in base_cols if c in df_no_exec.columns]
 
     with gr.Tab("Deep Learning - Execution generator") as tab_dl_exec:
-        gr.Markdown(f"## {app_desc_dl_exec}")
+        gr.Markdown(f"## {app_desc_dl_exec} - V3")
 
         gr.Markdown("### Program details")
 
@@ -72,7 +72,7 @@ def render_dl_execution_tab(
             col_count=(0, "dynamic"),
         )
 
-        # 🔹 Prompt auto-généré
+        # Prompt auto-généré
         prompt_box = gr.Textbox(
             label="Execution prompt (auto-generated)",
             interactive=False,
@@ -80,7 +80,7 @@ def render_dl_execution_tab(
             max_lines=5,
         )
 
-        # 🔹 Bouton + sortie génération
+        # Bouton + sortie génération
         generate_btn = gr.Button("Generate execution")
 
         generated_exec = gr.Textbox(
@@ -89,7 +89,7 @@ def render_dl_execution_tab(
             max_lines=20,
         )
 
-        # ---- Callback de mise à jour details + tableau + prompt ----
+        # Callback de mise à jour details + tableau + prompt
         def _format_details_exec(ex_name: str):
             empty_df = pd.DataFrame(columns=selected_cols)
             empty_prompt = ""
