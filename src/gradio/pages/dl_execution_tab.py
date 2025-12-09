@@ -11,6 +11,7 @@ from ..helpers.exercices_tab_utilis import (
 from ..generators.execution_generator import (
     build_execution_prompt,
     generate_execution_text,
+    get_dl_execution_model_report_components,
 )
 
 
@@ -89,6 +90,36 @@ def render_dl_execution_tab(
             max_lines=20,
         )
 
+        gr.Markdown("### Execution generator – Model report")
+
+        dl_summary = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Summary",
+        )
+
+        dl_model = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Model",
+        )
+
+        dl_training = gr.Dataframe(
+            value=pd.DataFrame({"Key": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Training",
+        )
+
+        dl_metrics = gr.Dataframe(
+            value=pd.DataFrame({"Metric": [], "Value": []}),
+            interactive=False,
+            wrap=True,
+            label="Metrics",
+        )
+
         # Callback de mise à jour details + tableau + prompt
         def _format_details_exec(ex_name: str):
             empty_df = pd.DataFrame(columns=selected_cols)
@@ -130,6 +161,12 @@ def render_dl_execution_tab(
 
             return details_text, sel_df, prompt
 
+        def _update_exec_report():
+            df_summary, df_model_df, df_training_df, df_metrics_df = get_dl_execution_model_report_components()
+            return df_summary, df_model_df, df_training_df, df_metrics_df
+
+
+
         exercice_selector.change(
             _format_details_exec,
             inputs=exercice_selector,
@@ -141,6 +178,12 @@ def render_dl_execution_tab(
             fn=generate_execution_text,
             inputs=prompt_box,
             outputs=generated_exec,
+        )
+
+        tab_dl_exec.select(
+            _update_exec_report,
+            inputs=None,  # ou [] mais None évite le warning
+            outputs=[dl_summary, dl_model, dl_training, dl_metrics],
         )
 
     # On retourne le DF sélectionné pour l’execution generator

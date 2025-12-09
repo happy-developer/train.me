@@ -138,7 +138,6 @@ def generate_clean_program(
 
 def generate_text_with_model(model_name: str, prompt: str) -> str:
     """Génère du texte avec le modèle sélectionné à partir du prompt."""
-    print(prompt)
     prompt = prompt.strip()
     if not prompt:
         return "Please enter a prompt before generating."
@@ -190,7 +189,6 @@ def get_dl_model_report_components(model_name: str):
         return _empty_dl_dfs()
 
     report_path = info.get("report_path")
-    print(report_path)
     if not report_path or not report_path.exists():
         return _empty_dl_dfs()
 

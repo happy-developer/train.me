@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from functools import lru_cache
 from typing import Mapping, Union, List
@@ -19,12 +20,11 @@ MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 # Chargement du modèle HF (tokenizer + modèle)
 MODEL_REPO = "AIppyDev/transformer_execution_generator_v3"
 MODEL_SUBFOLDER = "transformer_execution_generator_v3"  # le nom du dossier dans le repo
-
+REPORT_PATH = MODEL_DIR / "execution_generator_model_report.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Nombre max de tokens générés (équivalent MAX_LENGTH du notebook)
 EXEC_MAX_NEW_TOKENS = 180
-
 
 # ---------------------------------------------------------------------
 # Construction du prompt pour un programme
@@ -276,3 +276,70 @@ def generate_execution_text(
     final = [clean_execution_text(t) for t in deduped]
 
     return final[0] if final else ""
+
+
+def get_dl_execution_model_report_components():
+    """
+    Retourne 4 DataFrames Gradio-ready :
+    - Summary
+    - Model
+    - Training
+    - Metrics
+
+    Si pas de rapport → retourne les DF vides.
+    """
+
+    report_path = REPORT_PATH
+    if not report_path or not report_path.exists():
+        return _empty_dl_dfs()
+
+    try:
+        data = json.loads(report_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[DL REPORT] Error while reading {report_path}: {e}")
+        return _empty_dl_dfs()
+
+    # ===== Summary =====
+    dataset = data.get("dataset", {})
+
+    summary_rows = [
+        ("created_at",        data.get("created_at", "")),
+        ("task",              data.get("task", "")),
+        ("target",            data.get("target", "")),
+        ("framework",         data.get("framework", "")),
+        ("dataset.file",      dataset.get("file", "")),
+        ("dataset.size_bytes", dataset.get("size_bytes", "")),
+        ("dataset.tokens",    dataset.get("tokens", "")),
+    ]
+
+    df_summary = pd.DataFrame(summary_rows, columns=["Key", "Value"])
+
+    # ===== Model config =====
+    model_cfg = data.get("model", {}) or {}
+    df_model = pd.DataFrame(
+        [(k, v) for k, v in model_cfg.items()],
+        columns=["Key", "Value"],
+    )
+
+    # ===== Training =====
+    training_cfg = data.get("training", {}) or {}
+    df_training = pd.DataFrame(
+        [(k, v) for k, v in training_cfg.items()],
+        columns=["Key", "Value"],
+    )
+
+    # ===== Metrics =====
+    metrics_cfg = data.get("metrics", {}) or {}
+    df_metrics = pd.DataFrame(
+        [(k, v) for k, v in metrics_cfg.items()],
+        columns=["Metric", "Value"],
+    )
+
+    return df_summary, df_model, df_training, df_metrics
+
+def _empty_dl_dfs():
+    df_summary = pd.DataFrame({"Key": [], "Value": []})
+    df_model = pd.DataFrame({"Key": [], "Value": []})
+    df_training = pd.DataFrame({"Key": [], "Value": []})
+    df_metrics = pd.DataFrame({"Metric": [], "Value": []})
+    return df_summary, df_model, df_training, df_metrics
