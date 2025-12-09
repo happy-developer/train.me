@@ -13,7 +13,6 @@ p = build_paths(SRC_DIR)
 
 MODEL_DIR   = p["MODEL_DIR"]
 MODEL_PATH  = p["MODEL_PATH"]
-print(MODEL_PATH)
 FEATURE_SCALER_PATH = p.get("FEATURE_SCALER_PATH")
 TARGET_SCALER_PATH  = p.get("TARGET_SCALER_PATH")
 ENCODER_PATH = p["ENCODER_PATH"]
@@ -45,17 +44,17 @@ def build_app():
     app_title   = f"TrAIn.me — (v5.0-minimal)"
     app_desc_ml = "Personalize your experience"
     app_desc_ex = "Choose your training program"
-    app_desc_dl = "Generate your personalized exercise"
+    # app_desc_dl = "Generate your personalized exercise"
     app_desc_dl_exec = "Execution generator"
 
     from .pages.ml_tab import render_ml_tab
-    from .pages.exercices_tab import render_list_of_exercices
-    from .pages.dl_tab import render_dl_tab
+    # from .pages.exercices_tab import render_list_of_exercices
+    # from .pages.dl_tab import render_dl_tab
     from .pages.dl_execution_tab import render_dl_execution_tab
     from .config import UI_EXAMPLES
 
     with gr.Blocks(title=app_title) as demo:
-        gr.Markdown(f"# {app_title}\n{app_desc_ml} / {app_desc_dl}")
+        gr.Markdown(f"# {app_title}\n{app_desc_ml} / {app_desc_dl_exec}")
         with gr.Tabs():
             # Onglet 1 : ML
             level_out, wf_out, wt_out = render_ml_tab(
@@ -77,21 +76,21 @@ def build_app():
                 on_load=demo.load,
             )
 
-            # Onglet 2 : liste des programmes
-            selected_program_state, goal_state = render_list_of_exercices(
-                app_desc_ex=app_desc_ex,
-                level_out=level_out,
-            )
+            # # Onglet 2 : liste des programmes
+            # selected_program_state, goal_state = render_list_of_exercices(
+            #     app_desc_ex=app_desc_ex,
+            #     level_out=level_out,
+            # )
 
-            # Onglet 3 : DL – programme complet
-            render_dl_tab(
-                app_desc_dl=app_desc_dl,
-                level_out=level_out,
-                wf_comp=wf_out,
-                wt_comp=wt_out,
-                selected_program_df=selected_program_state,
-                goal_state=goal_state,
-            )
+            # # Onglet 3 : DL – programme complet
+            # render_dl_tab(
+            #     app_desc_dl=app_desc_dl,
+            #     level_out=level_out,
+            #     wf_comp=wf_out,
+            #     wt_comp=wt_out,
+            #     selected_program_df=selected_program_state,
+            #     goal_state=goal_state,
+            # )
 
             # Onglet 4 : DL – Execution generator
             render_dl_execution_tab(

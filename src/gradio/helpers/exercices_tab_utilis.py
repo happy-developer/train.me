@@ -28,57 +28,57 @@ def _load_exercices(path: Union[str, Path]) -> pd.DataFrame:
     return df
 
 
-DEFAULT_GOAL_PATH = Path(
-    os.getenv(
-        "GOAL_MAP_PATH",
-        json_path / "goal_map.json",
-    )
-)
+# DEFAULT_GOAL_PATH = Path(
+#     os.getenv(
+#         "GOAL_MAP_PATH",
+#         json_path / "goal_map.json",
+#     )
+# )
 
-def _load_goals(path: Union[str, Path]) -> list[str]:
-    """
-    Charge la liste des goals depuis goal_map.json.
-    On suppose un JSON de type: ["General Fitness", "Strength", ...]
-    """
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Goal map introuvable : {path}")
+# def _load_goals(path: Union[str, Path]) -> list[str]:
+#     """
+#     Charge la liste des goals depuis goal_map.json.
+#     On suppose un JSON de type: ["General Fitness", "Strength", ...]
+#     """
+#     path = Path(path)
+#     if not path.exists():
+#         raise FileNotFoundError(f"Goal map introuvable : {path}")
 
-    with path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+#     with path.open("r", encoding="utf-8") as f:
+#         data = json.load(f)
 
-    if isinstance(data, list):
-        # On garde les chaînes, on nettoie le doublons, on trie
-        goals = [str(x) for x in data if x not in (None, "")]
-        return sorted(set(goals))
+#     if isinstance(data, list):
+#         # On garde les chaînes, on nettoie le doublons, on trie
+#         goals = [str(x) for x in data if x not in (None, "")]
+#         return sorted(set(goals))
 
-    # fallback simple si jamais c’est un dict: on prend les clés
-    if isinstance(data, dict):
-        return sorted(map(str, data.keys()))
+#     # fallback simple si jamais c’est un dict: on prend les clés
+#     if isinstance(data, dict):
+#         return sorted(map(str, data.keys()))
 
-    raise ValueError(f"Format inattendu pour goal_map.json : {type(data)}")
+#     raise ValueError(f"Format inattendu pour goal_map.json : {type(data)}")
 
 
-def _sync_level(level_val: str) -> str:
-    # Recopie la valeur du champ 'level_out' du ML tab
-    return level_val or ""
+# def _sync_level(level_val: str) -> str:
+#     # Recopie la valeur du champ 'level_out' du ML tab
+#     return level_val or ""
 
-def _filter_by_level(df: pd.DataFrame, level: str) -> pd.DataFrame:
-    """Filtre automatiquement selon difficulty en fonction du niveau ML."""
-    if "difficulty" not in df.columns:
-        return df  # sécurité
+# def _filter_by_level(df: pd.DataFrame, level: str) -> pd.DataFrame:
+#     """Filtre automatiquement selon difficulty en fonction du niveau ML."""
+#     if "difficulty" not in df.columns:
+#         return df  # sécurité
 
-    level = (level or "").strip().lower()
+#     level = (level or "").strip().lower()
 
-    if level == "beginner":
-        allowed = ["beginner"]
-    elif level == "intermediate":
-        allowed = ["intermediate"]
-    elif level == "advanced":
-        allowed = ["advanced"]
-    elif level == "expert":
-        allowed = ["expert"]
-    else:  # vide
-        return df
+#     if level == "beginner":
+#         allowed = ["beginner"]
+#     elif level == "intermediate":
+#         allowed = ["intermediate"]
+#     elif level == "advanced":
+#         allowed = ["advanced"]
+#     elif level == "expert":
+#         allowed = ["expert"]
+#     else:  # vide
+#         return df
 
-    return df[df["difficulty"].str.lower().isin(allowed)]
+#     return df[df["difficulty"].str.lower().isin(allowed)]
