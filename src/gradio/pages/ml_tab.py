@@ -172,6 +172,21 @@ def render_ml_tab(
             elif 2.5 <= v <= 3:
                 return "Expert"
             return ""
+        
+        def xp_to_label_safe(xp: float) -> str:
+            try:
+                x = float(xp)
+            except (TypeError, ValueError):
+                return "Unknown"
+
+            if x < 2:
+                return "Beginner"
+            elif x < 4:
+                return "Intermediate"
+            elif x < 6:
+                return "Advanced"
+            else:
+                return "Athlete"
 
         def _fn(*vals):
             payload = {k: v for k, v in zip(names, vals)}
@@ -188,7 +203,6 @@ def render_ml_tab(
                     payload["Workout_Frequency (days/week)"]
                 )
 
-            # 1) prédiction XP via le pipeline existant
             y_xp, meta = predict_single(
                 payload=payload,
                 internal_expected=internal_expected,
@@ -201,6 +215,16 @@ def render_ml_tab(
                 target_name=target_name,
                 encoder=encoder,
             )
+
+            print("[DEBUG] y_xp =", y_xp)
+            print("[DEBUG] meta =", meta)
+
+            level_text = xp_to_label_safe(y_xp)
+            info_text = str(meta)
+
+            print("[DEBUG] level_text =", level_text)
+            print("[DEBUG] info_text  =", info_text)
+
 
             # 2) Calcul BMI & Body Fat %
             bmi = None
@@ -224,9 +248,6 @@ def render_ml_tab(
             except Exception:
                 bmi = None
                 fat_pct = None
-
-            # 3) Interprétation textuelle du niveau
-            level_text = _interpret_level(y_xp)
 
             # 4) Retourner les 5 sorties Gradio
             return y_xp, level_text, bmi, fat_pct, meta
