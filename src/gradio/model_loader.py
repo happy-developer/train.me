@@ -10,6 +10,7 @@ def load_model_and_schema(model_path: Path, schema_path: Path):
     Retourne (model, schema, target_name, features, expected_order).
     """
     # --- Chargement du modèle ---
+    print(model_path)
     model = joblib.load(model_path)
 
     # --- Chargement du schéma ---

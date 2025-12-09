@@ -13,6 +13,7 @@ p = build_paths(SRC_DIR)
 
 MODEL_DIR   = p["MODEL_DIR"]
 MODEL_PATH  = p["MODEL_PATH"]
+print(MODEL_PATH)
 FEATURE_SCALER_PATH = p.get("FEATURE_SCALER_PATH")
 TARGET_SCALER_PATH  = p.get("TARGET_SCALER_PATH")
 ENCODER_PATH = p["ENCODER_PATH"]
@@ -50,7 +51,7 @@ def build_app():
     from .pages.ml_tab import render_ml_tab
     from .pages.exercices_tab import render_list_of_exercices
     from .pages.dl_tab import render_dl_tab
-    from .pages.dl_execution_tab import render_dl_execution_tab  # 👈 nouveau renderer
+    from .pages.dl_execution_tab import render_dl_execution_tab
     from .config import UI_EXAMPLES
 
     with gr.Blocks(title=app_title) as demo:

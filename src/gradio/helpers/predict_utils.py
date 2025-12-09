@@ -74,7 +74,7 @@ def predict_single(
     workout_type_raw = payload.get("Workout_Type")
     if isinstance(workout_type_raw, str) and workout_type_raw.strip().lower() == "none":
         y_xp = 1.0
-
+        print(model_path)
         # Logging même si règle métier
         log_prediction(
             log_dir=log_dir,
