@@ -81,14 +81,45 @@ def render_dl_tab(
 
         # Sélecteur du modèle DL
         model_selector = gr.Dropdown(
-            label="Deep Learning model",
+            label="Sélection du modèle Deep Learning",
             choices=[
+                # LSTM (NAS)
+                "LSTM v1",
+                "LSTM v2",
+                "LSTM v3",
+
+                # Transformer (NAS)
+                "Transformer v1",
+                "Transformer v2",                     
+
+                # GPT-2 HF fine-tuning (NAS)
+                "GPT-2 Fine-tuned (HF) v1",
+                "GPT-2 Fine-tuned (HF) v2",
+                "GPT-2 Fine-tuned (HF) v3",
+                "GPT-2 Fine-tuned (HF) v4",
+
+                # GPT-2 distillation (NAS)
+                "GPT-2 Distilled v1",
+                "GPT-2 Distilled v2",
+                "GPT-2 Distilled v3",
+                "GPT-2 Distilled v5",
+                "GPT-2 Medium Distilled v6",
+                # "GPT-2 Large Distilled v7",
+                "GPT-2 Distilled v8",
+                "GPT-2 Distilled v9",
+                "GPT-2 Distilled v10",
+                # "GPT-2 Distilled v11",
+                "GPT-2 Distilled v14 (8 Epochs)",
+                "GPT-2 Distilled v15 (5 Epochs)",
+
+                # GPT-2 simple (TF1 – local)
                 "xMas - GPT2 Fine-tuning [Run1]",
                 "xMas - GPT2 Fine-tuning [Run2]",
-                "xMas - GPT2 Fine-tuning [Run3]",
+                "xMas - GPT2 Fine-tuning [Run3]",                
             ],
-            value="xMas - GPT2 Fine-tuning [Run1]",
+            value="GPT-2 Distilled v9",  # valeur par défaut (à adapter)
         )
+
 
         # Zone d'info sur le modèle chargé
         model_status = gr.Markdown(
@@ -202,7 +233,7 @@ def render_dl_tab(
             inputs=model_selector,
             outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
         )
-
+        
         # Synchronisation du profil + programme + prompt + rapport à l'ouverture du tab DL
         def _sync_profile(level_val, wf_val, wt_val, program_row, goal_val, model_name):
             level_text = level_val or ""

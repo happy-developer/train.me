@@ -1,15 +1,49 @@
+from pathlib import Path
 import textwrap
 import torch
 import re
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 class GPT2_DistilledTextGenerator:
-    """
-    Wrapper pour le modèle GPT-2 distillé de TrAIn.me.
-    Gère :
-    - génération auto-régressive
-    - temperature / top_p
-    - max_new_tokens
-    """
+    _INSTANCES = {}
+
+    @classmethod
+    def get_instance(
+        cls,
+        model_path,
+        max_new_tokens: int = 256
+    ) -> "GPT2_DistilledTextGenerator":
+        """
+        Charge (ou récupère en cache) un générateur GPT-2 distillé
+        depuis un dossier `model_path` (local ou NAS).
+        """
+        model_path = Path(model_path)
+
+        # On log pour debug
+        print(f"[GPT2_Distilled] Loading from: {model_path}")
+
+        # IMPORTANT : ne plus lever FileNotFoundError ici,
+        # on laisse Transformers gueuler si le dossier est vraiment faux.
+
+        local_dir = model_path.as_posix()
+
+        # cache par chemin string
+        if local_dir in cls._INSTANCES:
+            return cls._INSTANCES[local_dir]
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            local_dir,
+            local_files_only=True,
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            local_dir,
+            local_files_only=True,
+        )
+
+        instance = cls(model=model, tokenizer=tokenizer, max_new_tokens=max_new_tokens)
+        cls._INSTANCES[local_dir] = instance
+        return instance
 
     def __init__(self, model, tokenizer, max_new_tokens: int = 256):
         self.model = model

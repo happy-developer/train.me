@@ -11,12 +11,19 @@ from ..generators.gpt2_fine_tuning_text_generator import GPT2_FineTuningTextGene
 from ..generators.transformer_text_generator import TransformerTextGenerator
 from ..generators.lstm_text_generator import LSTMTextGenerator
 
+
+import textwrap
+import torch
+import re
+from pathlib import Path
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
 # ---------------------------------------------------------------------
 # Définition des chemins principaux
 # ---------------------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-MODEL_DIR = PROJECT_ROOT / "models" / "v1"
+MODEL_DIR_LOCAL = PROJECT_ROOT / "models" / "v1"
 
 
 # Chemin NAS en Path (UNC)
@@ -31,20 +38,119 @@ MODEL_DIR_NAS = NAS_ROOT
 # ---------------------------------------------------------------------
 
 MODEL_REGISTRY = {
+    # ============================
+    # GPT-2 SIMPLE (TF1) — LOCAL
+    # ============================
     "xMas - GPT2 Fine-tuning [Run1]": {
         "type": "gpt2_xmas",
-        "path": MODEL_DIR / "gpt2-xmas-finetuning_run1",
+        "path": MODEL_DIR_LOCAL / "gpt2-xmas-finetuning_run1",
     },
     "xMas - GPT2 Fine-tuning [Run2]": {
         "type": "gpt2_xmas",
-        "path": MODEL_DIR / "gpt2-xmas-finetuning_run2",
+        "path": MODEL_DIR_LOCAL / "gpt2-xmas-finetuning_run2",
     },
     "xMas - GPT2 Fine-tuning [Run3]": {
         "type": "gpt2_xmas",
-        "path": MODEL_DIR / "gpt2-xmas-finetuning_run3",
-        "report_path": MODEL_DIR / "GPT2_Fine_Tuning_model_report_gpt_2_simple.json",
+        "path": MODEL_DIR_LOCAL / "gpt2-xmas-finetuning_run3",
+        "report_path": MODEL_DIR_LOCAL / "GPT2_Fine_Tuning_model_report_gpt_2_simple.json",
+    },
+
+    # ============================
+    # GPT-2 FINE-TUNING — NAS
+    # ============================
+    "GPT-2 Fine-tuned (HF) v1": {
+        "type": "gpt2_fine_tuning",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_fine_tuning_gpt2_v1",
+    },
+    "GPT-2 Fine-tuned (HF) v2": {
+        "type": "gpt2_fine_tuning",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_fine_tuning_gpt2_v2",
+    },
+    "GPT-2 Fine-tuned (HF) v3": {
+        "type": "gpt2_fine_tuning",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_fine_tuning_gpt2_v3",
+    },
+    "GPT-2 Fine-tuned (HF) v4": {
+        "type": "gpt2_fine_tuning",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_fine_tuning_gpt2_v4",
+    },
+
+    # ============================
+    # GPT-2 DISTILLATION — NAS
+    # ============================
+    "GPT-2 Distilled v1": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v1",
+    },
+    "GPT-2 Distilled v2": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v2",
+    },
+    "GPT-2 Distilled v3": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v3",
+    },
+    "GPT-2 Distilled v5": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v5",
+    },
+    "GPT-2 Medium Distilled v6": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2-medium_trainme_distillation_gpt2_v6",
+    },
+    # # Problème
+    # "GPT-2 Large Distilled v7": {
+    #     "type": "gpt2_distilled",
+    #     "path": MODEL_DIR_NAS / "gpt2-large_trainme_distillation_gpt2_v7",
+    # },
+    "GPT-2 Distilled v8": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v8",
+    },
+    "GPT-2 Distilled v9": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v9",
+    },
+    "GPT-2 Distilled v10": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v10",
+    },
+     "GPT-2 Distilled v14 (8 Epochs)": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v14_epochs8",
+    },
+     "GPT-2 Distilled v15 (5 Epochs)": {
+        "type": "gpt2_distilled",
+        "path": MODEL_DIR_NAS / "gpt2_trainme_distillation_gpt2_v15_epochs5",
+    },
+    # ============================
+    # Transformer — NAS
+    # ============================
+    "Transformer v1": {
+        "type": "transformer",
+        "path": MODEL_DIR_NAS / "Transformer_v1",
+    },
+    "Transformer v2": {
+        "type": "transformer",
+        "path": MODEL_DIR_NAS / "Transformer_v2",
+    },
+    # ============================
+    # LSTM — NAS
+    # ============================
+    "LSTM v1": {
+        "type": "lstm",
+        "path": MODEL_DIR_NAS / "LSTM_v1",
+    },
+    "LSTM v2": {
+        "type": "lstm",
+        "path": MODEL_DIR_NAS / "LSTM_v2",
+    },
+    "LSTM v3": {
+        "type": "lstm",
+        "path": MODEL_DIR_NAS / "LSTM_v3",
     },
 }
+
 
 
 # Cache interne pour éviter de recharger plusieurs fois
@@ -62,33 +168,86 @@ def on_model_change(model_name: str) -> str:
     """
 
     info = MODEL_REGISTRY[model_name]
+    model_type = info["type"]
     model_path = info["path"]
     if isinstance(model_path, str):
         model_path = Path(model_path)
-
-    checkpoint_dir = str(model_path.parent)
-    run_name = model_path.name
+    model_path = model_path.resolve()
 
     # Déjà chargé ? On renvoie direct.
     if model_name in LOADED_MODELS:
         return f"Model loaded from cache: {model_path}"
 
-    tf.reset_default_graph()
-    sess = gpt2.start_tf_sess()
-    gpt2.load_gpt2(
-        sess,
-        checkpoint_dir=checkpoint_dir,
-        run_name=run_name,
-    )
+    # ===========================
+    # 1) GPT-2 xMas (TF1 local)
+    # ===========================
+    if model_type == "gpt2_xmas":
+        checkpoint_dir = str(model_path.parent)
+        run_name = model_path.name
 
-    # On pourrait stocker la session si besoin plus tard
-    LOADED_MODELS[model_name] = {
-        "sess": sess,
-        "checkpoint_dir": checkpoint_dir,
-        "run_name": run_name,
-    }
+        tf.reset_default_graph()
+        sess = gpt2.start_tf_sess()
+        gpt2.load_gpt2(
+            sess,
+            checkpoint_dir=checkpoint_dir,
+            run_name=run_name,
+        )
 
-    return f"Model loaded: {model_path}"
+        LOADED_MODELS[model_name] = {
+            "type": model_type,
+            "sess": sess,
+            "checkpoint_dir": checkpoint_dir,
+            "run_name": run_name,
+        }
+        return f"GPT-2 xMas loaded: {model_path}"
+
+    # ===========================
+    # 2) GPT-2 fine-tuning (HF)
+    # ===========================
+    if model_type == "gpt2_fine_tuning":
+        generator = GPT2_FineTuningTextGenerator.get_instance(model_path)
+        LOADED_MODELS[model_name] = {
+            "type": model_type,
+            "generator": generator,
+        }
+        return f"GPT-2 fine-tuned (HF) loaded: {model_path}"
+
+    # ===========================
+    # 3) GPT-2 distillé
+    # ===========================
+    if model_type == "gpt2_distilled":
+        generator = GPT2_DistilledTextGenerator.get_instance(model_path)
+        LOADED_MODELS[model_name] = {
+            "type": model_type,
+            "generator": generator,
+        }
+        return f"Distilled GPT-2 loaded: {model_path}"
+
+
+    # ===========================
+    # 4) Transformer
+    # ===========================
+    if model_type == "transformer":
+        generator = TransformerTextGenerator.get_instance(model_path)
+        LOADED_MODELS[model_name] = {
+            "type": model_type,
+            "generator": generator,
+        }
+        return f"Transformer loaded: {model_path}"
+
+    # ===========================
+    # 5) LSTM
+    # ===========================
+    if model_type == "lstm":
+        generator = LSTMTextGenerator.get_instance(model_path)
+        LOADED_MODELS[model_name] = {
+            "type": model_type,
+            "generator": generator,
+        }
+        return f"LSTM loaded: {model_path}"
+
+    raise ValueError(f"Unknown model type '{model_type}' for '{model_name}'")
+
 
 
 def clean_special_tokens(text: str) -> str:
