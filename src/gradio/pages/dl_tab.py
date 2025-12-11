@@ -89,7 +89,7 @@ def render_dl_tab(
                 "LSTM v3",
 
                 # Transformer (NAS)
-                "Transformer v1",
+                # "Transformer v1",
                 "Transformer v2",                     
 
                 # GPT-2 HF fine-tuning (NAS)

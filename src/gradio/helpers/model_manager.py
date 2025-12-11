@@ -126,13 +126,13 @@ MODEL_REGISTRY = {
     # ============================
     # Transformer — NAS
     # ============================
-    "Transformer v1": {
-        "type": "transformer",
-        "path": MODEL_DIR_NAS / "Transformer_v1",
-    },
+    # "Transformer v1": {
+    #     "type": "transformer",
+    #     "path": MODEL_DIR_NAS / "Transformer_v1" / "transformer_wordlevel_v1.keras",
+    # },
     "Transformer v2": {
         "type": "transformer",
-        "path": MODEL_DIR_NAS / "Transformer_v2",
+        "path": MODEL_DIR_NAS / "Transformer_v2" / "transformer_v2.pt",
     },
     # ============================
     # LSTM — NAS
@@ -227,13 +227,18 @@ def on_model_change(model_name: str) -> str:
     # ===========================
     # 4) Transformer
     # ===========================
-    if model_type == "transformer":
-        generator = TransformerTextGenerator.get_instance(model_path)
-        LOADED_MODELS[model_name] = {
-            "type": model_type,
-            "generator": generator,
-        }
+    elif model_type == "transformer":
+        from ..generators.transformer_text_generator import TransformerTextGenerator
+
+        TransformerTextGenerator._instance = None
+        if model_type == "transformer":
+            generator = TransformerTextGenerator.get_instance(model_path)
+            LOADED_MODELS[model_name] = {
+                "type": model_type,
+                "generator": generator,
+            }
         return f"Transformer loaded: {model_path}"
+
 
     # ===========================
     # 5) LSTM
