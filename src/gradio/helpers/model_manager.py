@@ -185,21 +185,15 @@ def on_model_change(model_name: str) -> str:
         checkpoint_dir = str(model_path.parent)
         run_name = model_path.name
 
-        tf.reset_default_graph()
-        sess = gpt2.start_tf_sess()
-        gpt2.load_gpt2(
-            sess,
-            checkpoint_dir=checkpoint_dir,
-            run_name=run_name,
-        )
-
+        # On NE CHARGE PLUS ici (problèmes de graph TF1 avec Gradio).
+        # On mémorise juste les infos nécessaires.
         LOADED_MODELS[model_name] = {
             "type": model_type,
-            "sess": sess,
             "checkpoint_dir": checkpoint_dir,
             "run_name": run_name,
         }
-        return f"GPT-2 xMas loaded: {model_path}"
+
+        return f"GPT-2 xMas ready: {model_path}"
 
     # ===========================
     # 2) GPT-2 fine-tuning (HF)
@@ -299,16 +293,19 @@ def generate_clean_program(
         nsamples=1,
         batch_size=1,
         return_as_list=True,
-        truncate="<|endoftext|>",  # s'arrête si le token apparaît
+        truncate="<|endoftext|>",
     )
 
-    # IMPORTANT : on force les chemins si fournis
     if checkpoint_dir is not None:
         gen_kwargs["checkpoint_dir"] = checkpoint_dir
     if run_name is not None:
         gen_kwargs["run_name"] = run_name
 
-    raw_list = gpt2.generate(**gen_kwargs)
+    # IMPORTANT : on force le graph du bon sess
+    with sess.as_default():
+        with sess.graph.as_default():
+            raw_list = gpt2.generate(**gen_kwargs)
+
     raw = raw_list[0] if isinstance(raw_list, list) else raw_list
 
     txt = clean_special_tokens(raw)
@@ -332,7 +329,7 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
 
     info = MODEL_REGISTRY.get(model_name)
     if info is None:
-        return f"❌ Unknown model: {model_name}"
+        return f"nknown model: {model_name}"
 
     model_type = info["type"]
     model_path = info["path"]
@@ -343,28 +340,40 @@ def generate_text_with_model(model_name: str, prompt: str) -> str:
     if model_type == "gpt2_xmas":
         cache = LOADED_MODELS.get(model_name)
 
-        # Si pas encore chargé (au cas où on n'est pas passé par on_model_change)
+        # Si pas encore préparé, on passe par on_model_change pour mémoriser le chemin
         if cache is None:
-            status = on_model_change(model_name)
+            _ = on_model_change(model_name)
             cache = LOADED_MODELS.get(model_name)
             if cache is None:
-                return f"❌ Unable to load GPT-2 model: {status}"
+                return f"Unable to prepare GPT-2 Xmas model for '{model_name}'"
 
-        sess = cache["sess"]
         checkpoint_dir = cache["checkpoint_dir"]
         run_name = cache["run_name"]
 
-        print(f"[GPT-2 TF1] Using checkpoint_dir={checkpoint_dir} run_name={run_name}")
-
-        # On réutilise ta fonction de nettoyage dédiée GPT-2 simple
-        text = generate_clean_program(
+        # 🔁 Nouveau graph / session à CHAQUE génération
+        tf.reset_default_graph()
+        sess = gpt2.start_tf_sess()
+        gpt2.load_gpt2(
             sess,
-            prompt=prompt,
-            max_length=220,
-            temperature=0.7,
             checkpoint_dir=checkpoint_dir,
             run_name=run_name,
         )
+
+        print(f"[GPT-2 TF1] Using checkpoint_dir={checkpoint_dir} run_name={run_name}")
+
+        try:
+            text = generate_clean_program(
+                sess,
+                prompt=prompt,
+                max_length=220,
+                temperature=0.7,
+                checkpoint_dir=checkpoint_dir,
+                run_name=run_name,
+            )
+        finally:
+            # On ferme proprement la session pour éviter les fuites mémoire
+            sess.close()
+
         return text
 
     # ------------------------------------------------------

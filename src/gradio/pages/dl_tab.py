@@ -149,37 +149,6 @@ def render_dl_tab(
             outputs=generated_text,
         )
 
-        # Tableaux du rapport DL
-        gr.Markdown("### Deep Learning model evaluation report")
-
-        dl_sum = gr.Dataframe(
-            value=pd.DataFrame({"Key": [], "Value": []}),
-            interactive=False,
-            wrap=True,
-            label="Summary",
-        )
-
-        dl_model = gr.Dataframe(
-            value=pd.DataFrame({"Key": [], "Value": []}),
-            interactive=False,
-            wrap=True,
-            label="Model",
-        )
-
-        dl_training = gr.Dataframe(
-            value=pd.DataFrame({"Key": [], "Value": []}),
-            interactive=False,
-            wrap=True,
-            label="Training",
-        )
-
-        dl_metrics = gr.Dataframe(
-            value=pd.DataFrame({"Metric": [], "Value": []}),
-            interactive=False,
-            wrap=True,
-            label="Metrics",
-        )
-
         # --- Helpers internes ---
 
         def _build_prompt(
@@ -221,17 +190,14 @@ def render_dl_tab(
         # --- Callbacks ---
 
         def _on_dl_model_select(name: str):
-            status = on_model_change(name)
-            df_sum, df_model, df_training, df_metrics = get_dl_model_report_components(
-                name
-            )
-            return status, df_sum, df_model, df_training, df_metrics
+            status = on_model_change(name)            
+            return status
 
         # Quand on change de modèle manuellement
         model_selector.change(
             fn=_on_dl_model_select,
             inputs=model_selector,
-            outputs=[model_status, dl_sum, dl_model, dl_training, dl_metrics],
+            outputs=[model_status],
         )
         
         # Synchronisation du profil + programme + prompt + rapport à l'ouverture du tab DL
@@ -262,10 +228,6 @@ def render_dl_tab(
                 program_df,
                 prompt,
                 status,
-                df_sum,
-                df_model,
-                df_training,
-                df_metrics,
             )
 
         tab_dl.select(
@@ -286,10 +248,6 @@ def render_dl_tab(
                 program_display,
                 prompt_box,
                 model_status,
-                dl_sum,
-                dl_model,
-                dl_training,
-                dl_metrics,
             ],
         )
 
@@ -304,8 +262,4 @@ def render_dl_tab(
         "wt_display": wt_display,
         "goal_display": goal_display,
         "program_display": program_display,
-        "dl_sum": dl_sum,
-        "dl_model": dl_model,
-        "dl_training": dl_training,
-        "dl_metrics": dl_metrics,
     }
