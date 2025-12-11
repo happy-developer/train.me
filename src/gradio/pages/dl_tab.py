@@ -84,7 +84,7 @@ def render_dl_tab(
             label="Sélection du modèle Deep Learning",
             choices=[
                 # LSTM (NAS)
-                "LSTM v1",
+                # "LSTM v1",
                 "LSTM v2",
                 "LSTM v3",
 

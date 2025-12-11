@@ -5,17 +5,19 @@ from collections import OrderedDict
 import numpy as np
 import torch
 import torch.nn as nn
-import pandas as pd  # <-- NEW
+import pandas as pd
 
+import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import load_model
 
 
 class LSTMTextGenerator:
     """
     Gestionnaire dédié pour le LSTM :
     - reçoit un modèle déjà chargé (PyTorch ou Keras) depuis on_model_change
-    - OU un state_dict PyTorch (OrderedDict) → reconstruit alors un nn.Module
+    - OU un chemin vers un fichier (.pt ou .keras)
     - charge + nettoie le corpus texte
     - recrée le tokenizer (identique au notebook LSTM v3)
     - génère du texte à partir d'un seed.
@@ -61,7 +63,7 @@ class LSTMTextGenerator:
             self.model.to(self.device)
             self.model.eval()
         else:
-            self.device = None
+            self.device = None  # Modèle Keras / TF
 
     # ----------------------------------------------------------------------
     # Reconstruction d'un modèle PyTorch à partir d'un state_dict
@@ -97,6 +99,7 @@ class LSTMTextGenerator:
                 f"→ out_features != vocab_size ({out_features} != {vocab_size})."
             )
 
+        # Détection du nombre de couches LSTM
         num_layers = 1
         for n in range(1, 10):
             if f"lstm.weight_ih_l{n}" in state:
@@ -132,29 +135,63 @@ class LSTMTextGenerator:
         return model
 
     # ----------------------------------------------------------------------
+    # Chargement depuis un chemin (PyTorch .pt ou Keras .keras)
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def _load_model_from_path(path: str | Path):
+        path = Path(path)
+        print(f"[LSTMTextGenerator] Loading model from path: {path}")
+
+        suffix = path.suffix.lower()
+
+        # --- Cas PyTorch (.pt) ---
+        if suffix == ".pt":
+            state = torch.load(path, map_location="cpu")
+            if isinstance(state, OrderedDict):
+                return LSTMTextGenerator._build_torch_model_from_state_dict(state)
+            return state
+
+        # --- Cas Keras (.keras) ---
+        if suffix == ".keras":
+            print(f"[LSTMTextGenerator] Loading Keras model from {path}")
+            return load_model(path, compile=False)
+
+        raise ValueError(f"Unsupported model file extension for {path}")
+
+    # ----------------------------------------------------------------------
     # Méthodes de classe : singleton
     # ----------------------------------------------------------------------
     @classmethod
-    def get_instance(cls, model) -> "LSTMTextGenerator":
+    def get_instance(cls, model_or_path) -> "LSTMTextGenerator":
         """
         Retourne une unique instance de LSTMTextGenerator, initialisée à partir :
         - d'un modèle LSTM déjà chargé (Keras ou PyTorch)
-        - ou d'un state_dict PyTorch (OrderedDict)
-        - du corpus texte dans data/programs/program_summary.csv
+        - d'un state_dict PyTorch (OrderedDict)
+        - ou d'un chemin de fichier (.pt ou .keras)
+        - + du corpus texte dans gradio/data/program_summary.csv
         """
         if cls._instance is not None:
             return cls._instance
 
-        # Charger + nettoyer le corpus (version CSV anglaise)
+        # 1) Chargement du modèle (objet ou chemin)
+        if isinstance(model_or_path, (str, Path)):
+            model = cls._load_model_from_path(model_or_path)
+        else:
+            model = model_or_path
+
+        # 2) Charger + nettoyer le corpus (version CSV anglaise)
         full_text_clean = cls._load_full_clean_corpus()
 
-        # Recréer le tokenizer EXACT comme dans le notebook
+        # 3) Recréer le tokenizer EXACT comme dans le notebook
         tokenizer = cls.build_tokenizer_from_corpus(full_text_clean)
 
+        # 4) Déterminer max_length
         max_length = cls.DEFAULT_SEQUENCE_LENGTH
-        if hasattr(model, "input_shape") and getattr(model, "input_shape") is not None:
+        if hasattr(model, "input_shape") and getattr(model, "input_shape", None) is not None:
             try:
-                max_length = int(model.input_shape[1]) + 1
+                shape = model.input_shape
+                if isinstance(shape, (list, tuple)) and len(shape) >= 2:
+                    max_length = int(shape[1])
             except Exception:
                 pass
 
@@ -192,7 +229,6 @@ class LSTMTextGenerator:
 
         df[text_cols] = df[text_cols].fillna("")
 
-        # Concaténation ligne par ligne (comme dans le notebook)
         lines = []
         for _, row in df[text_cols].iterrows():
             line = " ".join(str(row[c]) for c in text_cols).strip()
@@ -221,6 +257,7 @@ class LSTMTextGenerator:
     # Prédiction : unification Keras / PyTorch
     # ----------------------------------------------------------------------
     def _predict_proba(self, token_list: np.ndarray) -> np.ndarray:
+        # PyTorch
         if self._is_torch:
             x = torch.from_numpy(token_list).long().to(self.device)
             with torch.no_grad():
@@ -230,9 +267,31 @@ class LSTMTextGenerator:
                 logits = logits[0]
                 probs = torch.softmax(logits, dim=-1).cpu().numpy()
             return probs
-        else:
-            preds = self.model.predict(token_list, verbose=0)
+
+        # Keras / TensorFlow
+        x_np = np.asarray(token_list, dtype="int32")
+
+        # Eager TF2 → .predict()
+        if tf.executing_eagerly():
+            preds = self.model.predict(x_np, verbose=0)
+            if preds.ndim == 3:
+                preds = preds[:, -1, :]
             return preds[0]
+
+        # Mode graph TF1 / compat
+        x_tf = tf.convert_to_tensor(x_np, dtype=tf.int32)
+        outputs = self.model(x_tf, training=False)
+
+        if isinstance(outputs, (list, tuple)):
+            outputs = outputs[0]
+
+        if len(outputs.shape) == 3:
+            outputs = outputs[:, -1, :]
+
+        with tf.compat.v1.Session() as sess:
+            probs = sess.run(outputs)[0]
+
+        return probs
 
     # ----------------------------------------------------------------------
     # Génération auto-régressive
@@ -256,6 +315,7 @@ class LSTMTextGenerator:
             )
 
             predictions = self._predict_proba(token_list)
+
             predictions = np.log(predictions + 1e-7) / temperature
             predictions = np.exp(predictions) / np.sum(np.exp(predictions))
 

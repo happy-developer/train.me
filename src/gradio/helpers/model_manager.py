@@ -137,17 +137,17 @@ MODEL_REGISTRY = {
     # ============================
     # LSTM — NAS
     # ============================
-    "LSTM v1": {
-        "type": "lstm",
-        "path": MODEL_DIR_NAS / "LSTM_v1",
-    },
+    # "LSTM v1": {
+    #     "type": "lstm",
+    #     "path": MODEL_DIR_NAS / "LSTM_v1" / "lstm_wordlevel_v1.keras",
+    # },
     "LSTM v2": {
         "type": "lstm",
-        "path": MODEL_DIR_NAS / "LSTM_v2",
+        "path": MODEL_DIR_NAS / "LSTM_v2" / "lstm_v2.pt",
     },
     "LSTM v3": {
         "type": "lstm",
-        "path": MODEL_DIR_NAS / "LSTM_v3",
+        "path": MODEL_DIR_NAS / "LSTM_v3" / "lstm_v3.pt",
     },
 }
 
@@ -312,41 +312,122 @@ def generate_clean_program(
 
 
 def generate_text_with_model(model_name: str, prompt: str) -> str:
-    """Génère du texte avec le modèle sélectionné à partir du prompt."""
+    """
+    Génère du texte avec le modèle sélectionné à partir du prompt.
+
+    - gpt2_xmas        → GPT-2 simple (TF1, gpt_2_simple)
+    - gpt2_distilled   → GPT-2 distillé (HF, NAS)
+    - gpt2_fine_tuning → GPT-2 fine-tuné (HF, NAS)
+    - transformer      → Transformer Keras/HF
+    - lstm             → LSTM (Keras ou PyTorch)
+    """
     prompt = prompt.strip()
     if not prompt:
         return "Please enter a prompt before generating."
 
-    info = MODEL_REGISTRY[model_name]
-    model_path = info["path"]  # Path vers le dossier qui contient encoder.json / model-xxx
-    if isinstance(model_path, str):
-        model_path = Path(model_path)
+    info = MODEL_REGISTRY.get(model_name)
+    if info is None:
+        return f"❌ Unknown model: {model_name}"
 
-    checkpoint_dir = str(model_path.parent)   # ex: .../src/models/v1
-    run_name = model_path.name                # ex: "gpt2-xmas-finetuning_run3"
+    model_type = info["type"]
+    model_path = info["path"]
 
-    print(f"[GPT-2] Using checkpoint_dir={checkpoint_dir} run_name={run_name}")
+    # ------------------------------------------------------
+    # 1) GPT-2 simple (TF1, gpt_2_simple)
+    # ------------------------------------------------------
+    if model_type == "gpt2_xmas":
+        cache = LOADED_MODELS.get(model_name)
 
-    # Reset du graphe TF + session
-    tf.reset_default_graph()
-    sess = gpt2.start_tf_sess()
+        # Si pas encore chargé (au cas où on n'est pas passé par on_model_change)
+        if cache is None:
+            status = on_model_change(model_name)
+            cache = LOADED_MODELS.get(model_name)
+            if cache is None:
+                return f"❌ Unable to load GPT-2 model: {status}"
 
-    # On indique explicitement où est le modèle
-    gpt2.load_gpt2(
-        sess,
-        checkpoint_dir=checkpoint_dir,
-        run_name=run_name,
-    )
+        sess = cache["sess"]
+        checkpoint_dir = cache["checkpoint_dir"]
+        run_name = cache["run_name"]
 
-    text = generate_clean_program(
-        sess,
-        prompt=prompt,
-        max_length=220,
-        temperature=0.7,
-        checkpoint_dir=checkpoint_dir,
-        run_name=run_name,
-    )
-    return text
+        print(f"[GPT-2 TF1] Using checkpoint_dir={checkpoint_dir} run_name={run_name}")
+
+        # On réutilise ta fonction de nettoyage dédiée GPT-2 simple
+        text = generate_clean_program(
+            sess,
+            prompt=prompt,
+            max_length=220,
+            temperature=0.7,
+            checkpoint_dir=checkpoint_dir,
+            run_name=run_name,
+        )
+        return text
+
+    # ------------------------------------------------------
+    # 2) GPT-2 distillation (HF local / NAS)
+    # ------------------------------------------------------
+    if model_type == "gpt2_distilled":
+        cache = LOADED_MODELS.get(model_name)
+        generator = cache.get("generator") if cache else None
+
+        if generator is None:
+            generator = GPT2_DistilledTextGenerator.get_instance(model_path)
+            LOADED_MODELS[model_name] = {"generator": generator}
+
+        return generator.generate_text(prompt)
+
+    # ------------------------------------------------------
+    # 3) GPT-2 fine-tuning (HF local / NAS)
+    # ------------------------------------------------------
+    if model_type == "gpt2_fine_tuning":
+        cache = LOADED_MODELS.get(model_name)
+        generator = cache.get("generator") if cache else None
+
+        if generator is None:
+            generator = GPT2_FineTuningTextGenerator.get_instance(model_path)
+            LOADED_MODELS[model_name] = {"generator": generator}
+
+        return generator.generate_text(prompt)
+
+    # ------------------------------------------------------
+    # 4) Transformer (Keras / HF)
+    # ------------------------------------------------------
+    if model_type == "transformer":
+        cache = LOADED_MODELS.get(model_name)
+        generator = cache.get("generator") if cache else None
+
+        if generator is None:
+            generator = TransformerTextGenerator.get_instance(model_path)
+            LOADED_MODELS[model_name] = {"generator": generator}
+
+        # Adapter aux signatures de ton TransformerTextGenerator
+        return generator.generate_text(
+            seed_text=prompt,
+            num_words=80,
+            temperature=0.9,
+        )
+
+    # ------------------------------------------------------
+    # 5) LSTM (Keras ou PyTorch)
+    # ------------------------------------------------------
+    if model_type == "lstm":
+        cache = LOADED_MODELS.get(model_name)
+        generator = cache.get("generator") if cache else None
+
+        if generator is None:
+            generator = LSTMTextGenerator.get_instance(model_path)
+            LOADED_MODELS[model_name] = {"generator": generator}
+
+        return generator.generate_text(
+            seed_text=prompt,
+            num_words=80,
+            temperature=0.8,
+        )
+
+    # ------------------------------------------------------
+    # 6) Type inconnu
+    # ------------------------------------------------------
+    return f"Unknown model type: {model_type}"
+
 
 
 def get_dl_model_report_components(model_name: str):
