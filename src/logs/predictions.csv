@@ -394,3 +394,15 @@ ts,Age,Gender,Weight (kg),Experience_Level,Difficulty Level,Calories_Burned,late
 2025-12-11T17:24:02.798329+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal
 2025-12-11T17:24:47.630850+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal
 2025-12-11T17:38:40.934865+00:00,2.0,55.0,Male,84.07,1.63,3.97,Cardio,0,model.joblib,v4.3-minimal
+2025-12-12T07:04:10.359086+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal
+2025-12-12T07:07:17.993719+00:00,1.01,53.19,Female,105.05,1.84,3.02,Yoga,0,model.joblib,v4.3-minimal
+2025-12-12T07:08:01.474603+00:00,2.0,45.09,Male,52.42,1.88,4.0,Strength,0,model.joblib,v4.3-minimal
+2025-12-12T07:12:52.855285+00:00,2.0,55.0,Male,84.07,1.63,3.97,Cardio,0,model.joblib,v4.3-minimal
+2025-12-12T07:12:55.128450+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal
+2025-12-12T07:14:05.561639+00:00,2.0,45.09,Male,52.42,1.88,4.0,Strength,0,model.joblib,v4.3-minimal
+2025-12-12T07:14:44.213516+00:00,1.01,53.19,Female,105.05,1.84,3.02,Yoga,0,model.joblib,v4.3-minimal
+2025-12-12T07:29:25.031880+00:00,2.0,55.0,Male,84.07,1.63,3.97,Cardio,0,model.joblib,v4.3-minimal
+2025-12-12T07:29:27.229408+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal
+2025-12-12T07:51:59.709801+00:00,2.0,55.0,Male,84.07,1.63,3.97,Cardio,0,model.joblib,v4.3-minimal
+2025-12-12T08:08:18.409922+00:00,2.0,55.0,Male,84.07,1.63,3.97,Cardio,0,model.joblib,v4.3-minimal
+2025-12-12T09:46:19.959299+00:00,3.0,23.17,Male,58.41,1.78,4.96,Strength,0,model.joblib,v4.3-minimal

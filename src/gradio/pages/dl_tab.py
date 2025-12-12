@@ -117,7 +117,7 @@ def render_dl_tab(
                 "xMas - GPT2 Fine-tuning [Run2]",
                 "xMas - GPT2 Fine-tuning [Run3]",                
             ],
-            value="GPT-2 Distilled v9",  # valeur par défaut (à adapter)
+            value="GPT-2 Medium Distilled v6",  # valeur par défaut (à adapter)
         )
 
 

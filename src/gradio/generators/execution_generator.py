@@ -18,8 +18,8 @@ MODEL_DIR = PROJECT_ROOT / "models" / "v1"
 # Dossier de ton modèle finetuné d'exécution
 # EXEC_MODEL_DIR = MODEL_DIR / "transformer_execution_generator_v3"
 # Chargement du modèle HF (tokenizer + modèle)
-MODEL_REPO = "AIppyDev/transformer_execution_generator_v3"
-MODEL_SUBFOLDER = "transformer_execution_generator_v3"  # le nom du dossier dans le repo
+MODEL_REPO = "AIppyDev/transformer_execution_generator_v5"
+MODEL_SUBFOLDER = "transformer_execution_generator_v5"  # le nom du dossier dans le repo
 REPORT_PATH = MODEL_DIR / "execution_generator_model_report.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
