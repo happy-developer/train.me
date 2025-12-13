@@ -1,0 +1,11 @@
+{
+    "model_name": "lstm_v5",
+    "vocab_size": 11080,
+    "sequence_length": 15,
+    "epochs": 5,
+    "batch_size": 32,
+    "final_train_loss": 3.653114637486678,
+    "final_val_loss": 6.135851790880756,
+    "perplexity": 462.13256672291976,
+    "seeds_tested": 123
+}
