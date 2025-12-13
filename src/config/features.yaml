@@ -1,29 +1,5 @@
-# Features réellement utilisées dans ton pipeline ML
-selected_features_full_columns:
-  # Target
-  - Calories_Burned
-
-  # Core features
-  - Age
-  - Gender
-  - Weight (kg)
-  - Height (m)
-  - Max_BPM
-  - Avg_BPM
-  - Resting_BPM
-  - Session_Duration (hours)
-  - Experience_Level
-  - Workout_Type
-  - Difficulty Level
-  - Body Part
-  - Equipment Needed
-  - Workout_Frequency (days/week)
-  - Water_Intake (liters)
-  - Fat_Percentage
-  - diet_type
-  - meal_type
-
-selected_features_test:
+# Features utilisées dans le pipeline ML
+selected_features:
   # Target
   - Experience_Level
 
